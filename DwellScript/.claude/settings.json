@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "/Users/sanjeevhavanur/SRC/DwellScript/DwellScript.Web/Views/Billing",
+      "/Users/sanjeevhavanur/SRC/DwellScript/DwellScript.Web/Controllers/Api",
+      "/Users/sanjeevhavanur/SRC/DwellScript/DwellScript.Web/Controllers"
+    ]
+  }
+}
