@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DwellScript</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (!ViewData.ContainsKey("HideNav"))
+    {
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm">
+                <div class="container">
+                    <a class="navbar-brand fw-bold text-primary" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house-heart-fill me-1"></i>DwellScript
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="mainNav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Property" asp-action="Index">
+                                        <i class="bi bi-buildings me-1"></i>Properties
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Billing" asp-action="Index">
+                                        <i class="bi bi-credit-card me-1"></i>Billing
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm">Sign out</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        }
+                        else
+                        {
+                            <ul class="navbar-nav ms-auto">
+                                <li class="nav-item">
+                                    <a class="btn btn-primary btn-sm" asp-controller="Auth" asp-action="Login">Sign in</a>
+                                </li>
+                            </ul>
+                        }
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="border-top py-3 mt-5 text-muted small">
+        <div class="container d-flex justify-content-between">
+            <span>&copy; @DateTime.UtcNow.Year BAJANIHAVANUR LLC. All rights reserved.</span>
+            <span>
+                <a href="#" class="text-muted text-decoration-none me-3">Privacy</a>
+                <a href="#" class="text-muted text-decoration-none">Terms</a>
+            </span>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+    <script>
+        toastr.options = { positionClass: 'toast-top-right', timeOut: 4000, progressBar: true };
+    </script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

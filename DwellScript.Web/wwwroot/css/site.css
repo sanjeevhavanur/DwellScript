@@ -1,0 +1,37 @@
+html {
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    margin-bottom: 60px;
+}
+
+/* Auth pages */
+.auth-card {
+    max-width: 420px;
+    margin: 80px auto;
+}
+
+/* Focus rings */
+.btn:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Divider with text */
+.divider-text {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.divider-text::before,
+.divider-text::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid #dee2e6;
+}
