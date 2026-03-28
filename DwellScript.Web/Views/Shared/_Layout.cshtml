@@ -6,81 +6,147 @@
     <title>@ViewData["Title"] - DwellScript</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    @if (!ViewData.ContainsKey("HideNav"))
-    {
-        <header>
-            <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm">
-                <div class="container">
-                    <a class="navbar-brand fw-bold text-primary" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-house-heart-fill me-1"></i>DwellScript
-                    </a>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="mainNav">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <ul class="navbar-nav ms-auto align-items-center gap-2">
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Property" asp-action="Index">
-                                        <i class="bi bi-buildings me-1"></i>Properties
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Billing" asp-action="Index">
-                                        <i class="bi bi-credit-card me-1"></i>Billing
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <form asp-controller="Auth" asp-action="Logout" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-outline-secondary btn-sm">Sign out</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        }
-                        else
-                        {
-                            <ul class="navbar-nav ms-auto">
-                                <li class="nav-item">
-                                    <a class="btn btn-primary btn-sm" asp-controller="Auth" asp-action="Login">Sign in</a>
-                                </li>
-                            </ul>
-                        }
-                    </div>
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString()?.ToLower();
+    var currentAction     = ViewContext.RouteData.Values["action"]?.ToString()?.ToLower();
+    var userEmail   = User.Identity?.Name ?? "";
+    var userInitial = userEmail.Length > 0 ? userEmail[0].ToString().ToUpper() : "?";
+    var tier        = ViewData["Tier"]?.ToString() ?? "Free";
+    var quotaUsed   = ViewData["QuotaUsed"] as int? ?? 0;
+    var quotaMax    = ViewData["QuotaMax"] as int? ?? 3;
+    var quotaPct    = quotaMax > 0 ? Math.Min(100, (int)((quotaUsed / (double)quotaMax) * 100)) : 0;
+    var quotaWarning = quotaPct >= 66;
+}
+
+<div class="ds-shell">
+
+    <!-- ── Sidebar ────────────────────────────────── -->
+    <aside class="ds-sidebar">
+
+        <a href="/Property" class="ds-sidebar-logo">
+            <div class="ds-logo-mark">D</div>
+            <span class="ds-logo-text">Dwell<span>Script</span></span>
+        </a>
+
+        <nav class="ds-nav">
+            <div class="ds-nav-label">Menu</div>
+
+            <a href="/Property" class="ds-nav-item @(currentController == "property" ? "active" : "")">
+                <i class="bi bi-buildings"></i>Properties
+            </a>
+            <a href="/Billing" class="ds-nav-item @(currentController == "billing" ? "active" : "")">
+                <i class="bi bi-credit-card"></i>Billing
+            </a>
+        </nav>
+
+        <div class="ds-sidebar-bottom">
+            <div class="ds-quota-block">
+                <div class="ds-quota-label">
+                    <span>Generations</span>
+                    <span>@quotaUsed / @quotaMax</span>
                 </div>
-            </nav>
+                <div class="ds-quota-bar">
+                    <div class="ds-quota-fill @(quotaWarning ? "warning" : "")" style="width:@quotaPct%"></div>
+                </div>
+            </div>
+
+            @if (tier == "Free" || tier == "Starter")
+            {
+                <a href="/Billing" class="ds-upgrade-btn">
+                    <i class="bi bi-stars"></i>Upgrade to Pro
+                </a>
+            }
+
+            <div class="ds-user-row">
+                <div class="ds-avatar">@userInitial</div>
+                <span class="ds-user-name">@userEmail</span>
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="ms-auto">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" style="background:none;border:none;padding:0;color:rgba(255,255,255,.4);cursor:pointer;font-size:14px;" title="Sign out">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ── Main ───────────────────────────────────── -->
+    <div class="ds-main">
+
+        <!-- Topbar -->
+        <header class="ds-topbar">
+            <span class="ds-topbar-title">@(ViewData["Title"] ?? "DwellScript")</span>
+            <div class="ds-topbar-actions">
+                <button class="ds-icon-btn" id="themeToggle" title="Toggle dark mode">
+                    <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                </button>
+                <span class="ds-pill ds-pill-@tier.ToLower()">@tier</span>
+            </div>
         </header>
+
+        @await RenderSectionAsync("PageTabs", required: false)
+
+        <!-- Content -->
+        <div class="ds-content">
+            @RenderBody()
+        </div>
+
+    </div>
+</div>
+
+<!-- Copied tooltip -->
+<div id="copiedTooltip"></div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+<script>
+    toastr.options = { positionClass: 'toast-top-right', timeOut: 4000, closeButton: true, progressBar: true, newestOnTop: true };
+
+    // Dark mode
+    (function () {
+        var saved = localStorage.getItem('ds-theme');
+        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').className = 'bi bi-sun-fill';
+        }
+    })();
+
+    $('#themeToggle').on('click', function () {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            document.getElementById('themeIcon').className = 'bi bi-moon-stars-fill';
+            localStorage.setItem('ds-theme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').className = 'bi bi-sun-fill';
+            localStorage.setItem('ds-theme', 'dark');
+        }
+    });
+
+    // Copy tooltip
+    function showCopied(label) {
+        var el = document.getElementById('copiedTooltip');
+        el.textContent = '✓ ' + label + ' copied';
+        el.classList.add('show');
+        setTimeout(function () { el.classList.remove('show'); }, 2200);
     }
 
-    <main>
-        @RenderBody()
-    </main>
-
-    <footer class="border-top py-3 mt-5 text-muted small">
-        <div class="container d-flex justify-content-between">
-            <span>&copy; @DateTime.UtcNow.Year DwellScript. All rights reserved.</span>
-            <span>
-                <a href="#" class="text-muted text-decoration-none me-3">Privacy</a>
-                <a href="#" class="text-muted text-decoration-none">Terms</a>
-            </span>
-        </div>
-    </footer>
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
-    <script>
-        toastr.options = { positionClass: 'toast-top-right', timeOut: 4000, progressBar: true };
-    </script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    // CSRF helper
+    function csrfToken() {
+        return $('input[name="__RequestVerificationToken"]').val() ||
+               $('meta[name="csrf-token"]').attr('content') || '';
+    }
+</script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,112 +1,583 @@
 @{
+    Layout = "_AuthLayout";
     ViewData["Title"] = "Sign in";
-    ViewData["HideNav"] = true;
     var error = Context.Request.Query["error"].ToString();
 }
 
-<div class="auth-card px-3">
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-4 p-md-5">
+<style>
+/* ── Login Page ─────────────────────────────────────── */
+.login-shell {
+    display: flex;
+    min-height: 100vh;
+}
 
-            <div class="text-center mb-4">
-                <h4 class="fw-bold text-primary mb-1">
-                    <i class="bi bi-house-heart-fill me-1"></i>DwellScript
-                </h4>
-                <p class="text-muted mb-0">Sign in to your account</p>
+/* Left panel */
+.login-left {
+    width: 52%;
+    background: var(--ds-navy-900);
+    background-image: radial-gradient(ellipse at 20% 50%, rgba(37,99,235,.18) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(249,115,22,.12) 0%, transparent 50%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 48px;
+    overflow: hidden;
+}
+
+.login-left-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+}
+
+.login-logo-mark {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--ds-warm-500), var(--ds-warm-600));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    box-shadow: var(--shadow-warm);
+}
+
+.login-logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.login-logo-text span { color: var(--ds-warm-400); }
+
+.login-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: var(--radius-full);
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,.75);
+    margin-bottom: 20px;
+    width: fit-content;
+}
+
+.login-hero {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 32px;
+}
+
+.login-hero .accent { color: var(--ds-warm-400); }
+
+.login-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.login-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.login-feature-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,.08);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,.1);
+}
+
+.login-feature-text strong {
+    display: block;
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.login-feature-text span {
+    color: rgba(255,255,255,.5);
+    font-size: 12.5px;
+}
+
+/* Floating preview card */
+.login-preview-card {
+    background: rgba(255,255,255,.07);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: var(--radius-xl);
+    padding: 16px 20px;
+    margin-top: auto;
+    animation: float 3s ease-in-out infinite alternate;
+}
+
+.login-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.preview-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ds-warm-500);
+    animation: breathe 2s ease-in-out infinite;
+}
+
+.preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,.8);
+}
+
+.preview-lines { display: flex; flex-direction: column; gap: 5px; }
+
+.preview-line {
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,.12);
+}
+
+/* Social proof */
+.login-social-proof {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.proof-avatars { display: flex; }
+
+.proof-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--ds-navy-900);
+    margin-left: -8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.proof-avatar:first-child { margin-left: 0; }
+
+.proof-text {
+    font-size: 12px;
+    color: rgba(255,255,255,.55);
+}
+
+/* Right panel */
+.login-right {
+    width: 48%;
+    background: var(--bg-page);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 48px;
+    position: relative;
+}
+
+.theme-toggle-fixed {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.login-form-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    padding: 36px;
+    box-shadow: var(--shadow-lg);
+}
+
+.login-form-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.login-form-sub {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+/* Tab switcher */
+.login-tabs {
+    display: flex;
+    background: var(--bg-surface-2);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+    margin-bottom: 24px;
+}
+
+.login-tab {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.login-tab.active {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Magic link button */
+.btn-magic {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--ds-navy-800), var(--ds-navy-700));
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-spring);
+    box-shadow: var(--shadow-brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-magic:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37,99,235,.35);
+}
+
+.btn-magic:disabled { opacity: .7; cursor: not-allowed; transform: none; }
+
+/* Success state */
+.login-success {
+    display: none;
+    text-align: center;
+    padding: 8px 0;
+    animation: pop-in .4s cubic-bezier(.34,1.56,.64,1);
+}
+
+.success-check {
+    width: 64px;
+    height: 64px;
+    background: var(--ds-success-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 28px;
+    color: var(--ds-success);
+}
+
+/* Google button */
+.btn-google {
+    width: 100%;
+    padding: 11px;
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.btn-google:hover {
+    background: var(--bg-surface-2);
+    border-color: var(--ds-navy-400);
+    color: var(--text-primary);
+}
+
+@@media (max-width: 768px) {
+    .login-left { display: none; }
+    .login-right { width: 100%; padding: 24px 20px; }
+}
+</style>
+
+<div class="login-shell">
+
+    <!-- ── Left Panel ──────────────────────────────── -->
+    <div class="login-left">
+        <div class="login-left-logo">
+            <div class="login-logo-mark">D</div>
+            <span class="login-logo-text">Dwell<span>Script</span></span>
+        </div>
+
+        <div class="login-eyebrow">
+            <i class="bi bi-stars" style="color:var(--ds-warm-400)"></i>
+            AI-Powered Rental Listings
+        </div>
+
+        <h1 class="login-hero">
+            Fill vacancies<br>faster with <span class="accent">smarter</span><br>listings.
+        </h1>
+
+        <ul class="login-features">
+            <li class="login-feature">
+                <div class="login-feature-icon" style="color:var(--ds-warm-400)"><i class="bi bi-lightning-charge-fill"></i></div>
+                <div class="login-feature-text">
+                    <strong>One-click generation</strong>
+                    <span>LTR, STR, social captions & headlines in seconds</span>
+                </div>
+            </li>
+            <li class="login-feature">
+                <div class="login-feature-icon" style="color:var(--ds-navy-400)"><i class="bi bi-shield-check-fill"></i></div>
+                <div class="login-feature-text">
+                    <strong>Fair Housing compliant</strong>
+                    <span>Every output scanned before delivery</span>
+                </div>
+            </li>
+            <li class="login-feature">
+                <div class="login-feature-icon" style="color:#34d399"><i class="bi bi-graph-up-arrow"></i></div>
+                <div class="login-feature-text">
+                    <strong>Vacancy Analyzer</strong>
+                    <span>Diagnose why listings underperform</span>
+                </div>
+            </li>
+            <li class="login-feature">
+                <div class="login-feature-icon" style="color:#a78bfa"><i class="bi bi-buildings-fill"></i></div>
+                <div class="login-feature-text">
+                    <strong>Multi-property management</strong>
+                    <span>All your rentals, one dashboard</span>
+                </div>
+            </li>
+        </ul>
+
+        <div class="login-preview-card">
+            <div class="login-preview-header">
+                <div class="preview-dot"></div>
+                <span class="preview-title">Generating listing copy…</span>
             </div>
+            <div class="preview-lines">
+                <div class="preview-line" style="width:90%"></div>
+                <div class="preview-line" style="width:75%"></div>
+                <div class="preview-line" style="width:60%"></div>
+            </div>
+        </div>
+
+        <div class="login-social-proof">
+            <div class="proof-avatars">
+                <div class="proof-avatar" style="background:#2563eb">J</div>
+                <div class="proof-avatar" style="background:#ea580c">M</div>
+                <div class="proof-avatar" style="background:#16a34a">S</div>
+                <div class="proof-avatar" style="background:#7c3aed">R</div>
+            </div>
+            <span class="proof-text">Trusted by 500+ independent landlords</span>
+        </div>
+    </div>
+
+    <!-- ── Right Panel ─────────────────────────────── -->
+    <div class="login-right">
+
+        <button class="ds-icon-btn theme-toggle-fixed" id="themeToggle" title="Toggle dark mode">
+            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+        </button>
+
+        <div class="login-form-card">
+            <h2 class="login-form-title">Welcome back</h2>
+            <p class="login-form-sub">Sign in to your DwellScript account</p>
 
             @if (error == "expired")
             {
-                <div class="alert alert-warning py-2 small">
-                    <i class="bi bi-clock me-1"></i>That link has expired. Request a new one below.
+                <div class="alert alert-warning py-2 small mb-3">
+                    <i class="bi bi-clock me-1"></i>That link has expired. Request a new one.
                 </div>
             }
-            else if (error == "invalid")
+            else if (error == "invalid" || error == "google")
             {
-                <div class="alert alert-danger py-2 small">
-                    <i class="bi bi-exclamation-circle me-1"></i>Invalid login link. Please try again.
-                </div>
-            }
-            else if (error == "google")
-            {
-                <div class="alert alert-danger py-2 small">
-                    <i class="bi bi-exclamation-circle me-1"></i>Google sign-in failed. Please try again.
+                <div class="alert alert-danger py-2 small mb-3">
+                    <i class="bi bi-exclamation-circle me-1"></i>Sign-in failed. Please try again.
                 </div>
             }
 
-            @* Magic Link Form *@
-            <form id="magicLinkForm" novalidate>
-                @Html.AntiForgeryToken()
-                <div class="mb-3">
-                    <label for="email" class="form-label fw-medium">Email address</label>
-                    <input type="email" class="form-control form-control-lg" id="email" name="email"
-                           placeholder="you@example.com" required autocomplete="email" />
-                </div>
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-primary btn-lg" id="magicLinkBtn">
-                        <span class="btn-text">Send magic link</span>
-                        <span class="spinner-border spinner-border-sm d-none ms-2" role="status"></span>
-                    </button>
-                </div>
-            </form>
-
-            <div class="divider-text my-4">or</div>
-
-            @* Google OAuth *@
-            <div class="d-grid">
-                <a href="/Auth/GoogleLogin" class="btn btn-outline-secondary btn-lg">
-                    <svg class="me-2" style="width:18px;height:18px;vertical-align:-3px" viewBox="0 0 48 48">
-                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-                    </svg>
-                    Continue with Google
-                </a>
+            <!-- Tab switcher -->
+            <div class="login-tabs">
+                <button class="login-tab active" id="tabMagic" onclick="switchTab('magic')">
+                    <i class="bi bi-envelope-fill"></i> Magic Link
+                </button>
+                <button class="login-tab" id="tabGoogle" onclick="switchTab('google')">
+                    <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Google
+                </button>
             </div>
 
-            <p class="text-center text-muted small mt-4 mb-0">
-                No password needed. We'll email you a secure link.
-            </p>
+            <!-- Magic Link tab -->
+            <div id="panelMagic">
+                <form id="magicForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="ds-label" for="email">Email address</label>
+                        <div class="ds-input-group">
+                            <i class="bi bi-envelope ds-input-icon"></i>
+                            <input type="email" id="email" name="email" class="ds-input" placeholder="you@example.com" autocomplete="email" required />
+                        </div>
+                        <div class="text-danger small mt-1 d-none" id="emailError">Please enter a valid email address.</div>
+                    </div>
+                    <button type="submit" class="btn-magic" id="magicBtn">
+                        <i class="bi bi-send-fill" id="magicBtnIcon"></i>
+                        <span id="magicBtnText">Send Magic Link</span>
+                    </button>
+                </form>
 
+                <!-- Success state -->
+                <div class="login-success" id="magicSuccess">
+                    <div class="success-check"><i class="bi bi-check-lg"></i></div>
+                    <h5 class="fw-bold mb-1" style="color:var(--text-primary)">Check your inbox</h5>
+                    <p class="text-secondary small mb-3">We sent a login link to <strong id="sentEmail"></strong></p>
+                    <a href="#" class="text-secondary small me-3" id="differentEmail">Use a different email</a>
+                    <a href="#" class="text-secondary small" id="resendLink">Resend link</a>
+                </div>
+            </div>
+
+            <!-- Google tab -->
+            <div id="panelGoogle" class="d-none">
+                <a href="/Auth/GoogleLogin" class="btn-google">
+                    <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Continue with Google
+                </a>
+                <div class="text-center mt-3">
+                    <a href="#" class="text-secondary small" onclick="switchTab('magic'); return false;">Or sign in with Email</a>
+                </div>
+            </div>
+
+            <p class="text-center mt-4 mb-0" style="font-size:12px;color:var(--text-tertiary)">
+                No password required — ever.
+            </p>
         </div>
     </div>
 </div>
 
 @section Scripts {
 <script>
-    $('#magicLinkForm').on('submit', function (e) {
+    // Dark mode
+    (function () {
+        var saved = localStorage.getItem('ds-theme');
+        if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').className = 'bi bi-sun-fill';
+        }
+    })();
+
+    $('#themeToggle').on('click', function () {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            document.getElementById('themeIcon').className = 'bi bi-moon-stars-fill';
+            localStorage.setItem('ds-theme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').className = 'bi bi-sun-fill';
+            localStorage.setItem('ds-theme', 'dark');
+        }
+    });
+
+    function switchTab(tab) {
+        if (tab === 'magic') {
+            $('#panelMagic').removeClass('d-none');
+            $('#panelGoogle').addClass('d-none');
+            $('#tabMagic').addClass('active');
+            $('#tabGoogle').removeClass('active');
+        } else {
+            $('#panelGoogle').removeClass('d-none');
+            $('#panelMagic').addClass('d-none');
+            $('#tabGoogle').addClass('active');
+            $('#tabMagic').removeClass('active');
+        }
+    }
+
+    var lastEmail = '';
+
+    $('#magicForm').on('submit', function (e) {
         e.preventDefault();
-
         var email = $('#email').val().trim();
-        if (!email) return;
-
-        var $btn = $('#magicLinkBtn');
-        $btn.prop('disabled', true);
-        $btn.find('.btn-text').text('Sending...');
-        $btn.find('.spinner-border').removeClass('d-none');
+        if (!email || !email.includes('@@')) {
+            $('#email').addClass('error');
+            $('#emailError').removeClass('d-none');
+            return;
+        }
+        $('#email').removeClass('error');
+        $('#emailError').addClass('d-none');
+        lastEmail = email;
+        setLoading(true);
 
         $.ajax({
             url: '/Auth/SendMagicLink',
             method: 'POST',
-            data: {
-                email: email,
-                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-            },
-            success: function (res) {
-                toastr.success(res.message);
-                $('#magicLinkForm')[0].reset();
+            data: { email: email, __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val() },
+            success: function () {
+                $('#magicForm').hide();
+                $('#sentEmail').text(email);
+                $('#magicSuccess').css('display', 'block');
             },
             error: function (xhr) {
-                var msg = xhr.responseJSON?.message ?? 'Something went wrong. Please try again.';
+                var msg = xhr.responseJSON?.message || 'Something went wrong. Please try again.';
                 toastr.error(msg);
             },
-            complete: function () {
-                $btn.prop('disabled', false);
-                $btn.find('.btn-text').text('Send magic link');
-                $btn.find('.spinner-border').addClass('d-none');
-            }
+            complete: function () { setLoading(false); }
         });
+    });
+
+    function setLoading(on) {
+        $('#magicBtn').prop('disabled', on);
+        $('#magicBtnIcon').attr('class', on ? 'bi bi-hourglass-split' : 'bi bi-send-fill');
+        $('#magicBtnText').text(on ? 'Sending…' : 'Send Magic Link');
+    }
+
+    $('#differentEmail, #resendLink').on('click', function (e) {
+        e.preventDefault();
+        $('#magicSuccess').hide();
+        $('#magicForm').show();
+        if ($(this).attr('id') === 'resendLink' && lastEmail) {
+            $('#email').val(lastEmail);
+            $('#magicForm').trigger('submit');
+        } else {
+            $('#email').val('').focus();
+        }
     });
 </script>
 }

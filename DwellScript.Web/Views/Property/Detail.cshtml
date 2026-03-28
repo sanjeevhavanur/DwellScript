@@ -1,0 +1,505 @@
+@{
+    var propId = ViewData["PropertyId"] as int? ?? 0;
+    ViewData["Title"] = "Property";
+}
+
+<style>
+/* ── Detail page ───────────────────────────────────── */
+.detail-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:0; padding:0 0 16px; }
+.detail-address { font-size:18px; font-weight:700; color:var(--text-primary); margin:0 0 2px; }
+.detail-meta { font-size:12.5px; color:var(--text-tertiary); }
+
+/* Output cards */
+.output-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@@media (max-width:900px) { .output-grid { grid-template-columns:1fr; } }
+
+.output-card { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-xl); overflow:hidden; box-shadow:var(--shadow-sm); }
+.output-card-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--border); background:var(--bg-surface-2); }
+.output-card-title { font-size:13px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+.output-card-actions { display:flex; gap:6px; }
+.output-action-btn { padding:5px 10px; border:1.5px solid var(--border-strong); border-radius:var(--radius-md); background:var(--bg-surface); font-size:12px; font-weight:500; color:var(--text-secondary); cursor:pointer; transition:var(--transition-base); display:flex; align-items:center; gap:5px; }
+.output-action-btn:hover { background:var(--bg-surface-2); color:var(--text-primary); border-color:var(--ds-navy-400); }
+.output-body { padding:16px; min-height:120px; font-size:13.5px; line-height:1.75; color:var(--text-primary); white-space:pre-wrap; }
+.output-body.empty { color:var(--text-tertiary); font-style:italic; }
+
+/* Headlines card */
+.headlines-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+.headline-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1.5px solid var(--border); border-radius:var(--radius-md); background:var(--bg-surface-2); transition:var(--transition-base); }
+.headline-item:hover { border-color:var(--ds-navy-400); background:var(--ds-navy-50); }
+.headline-num { font-size:11px; font-weight:700; color:var(--text-tertiary); width:18px; flex-shrink:0; }
+.headline-text { flex:1; font-size:13.5px; font-weight:500; color:var(--text-primary); }
+.headline-copy { padding:4px 8px; border:none; background:transparent; color:var(--text-tertiary); cursor:pointer; border-radius:var(--radius-md); font-size:13px; transition:var(--transition-base); }
+.headline-copy:hover { background:var(--bg-surface); color:var(--text-primary); }
+
+/* Generate panel */
+.gen-panel { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-xl); padding:20px; box-shadow:var(--shadow-sm); margin-bottom:20px; }
+.gen-panel-title { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+
+/* Regenerate section chips */
+.regen-chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+.regen-chip { padding:6px 13px; border:1.5px solid var(--border-strong); border-radius:var(--radius-full); font-size:12.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; background:var(--bg-surface); transition:var(--transition-base); }
+.regen-chip:hover { border-color:var(--ds-warm-500); color:var(--ds-warm-600); }
+.regen-chip.selected { background:var(--ds-warm-50); border-color:var(--ds-warm-500); color:var(--ds-warm-600); }
+
+/* History list */
+.history-item { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+.history-item:last-child { border-bottom:none; }
+.history-icon { width:36px; height:36px; border-radius:var(--radius-md); background:var(--bg-surface-2); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.history-info { flex:1; }
+.history-date { font-size:12px; color:var(--text-tertiary); }
+.history-type { font-size:13.5px; font-weight:600; color:var(--text-primary); }
+.history-tags { display:flex; gap:5px; margin-top:3px; }
+
+/* Analyzer */
+.analyzer-score { width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; border:4px solid; font-size:22px; font-weight:800; }
+.analyzer-score.good { border-color:var(--ds-success); color:var(--ds-success); }
+.analyzer-score.warn { border-color:var(--ds-warning); color:var(--ds-warning); }
+.analyzer-score.bad  { border-color:var(--ds-error); color:var(--ds-error); }
+.insight-item { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--border); }
+.insight-item:last-child { border-bottom:none; }
+.insight-dot { width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+
+/* Loading overlay for generate */
+.gen-loading { display:none; text-align:center; padding:40px 20px; }
+.gen-loading-spinner { width:48px; height:48px; border:4px solid var(--border); border-top-color:var(--ds-navy-600); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px; }
+@@keyframes spin { to { transform:rotate(360deg); } }
+</style>
+
+@Html.AntiForgeryToken()
+
+<!-- Property header (loaded via JS) -->
+<div id="propHeader" class="detail-header">
+    <div>
+        <div class="skeleton" style="height:20px;width:280px;margin-bottom:6px;border-radius:8px"></div>
+        <div class="skeleton" style="height:12px;width:180px;border-radius:6px"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+        <div class="skeleton" style="height:36px;width:90px;border-radius:10px"></div>
+        <div class="skeleton" style="height:36px;width:130px;border-radius:10px"></div>
+    </div>
+</div>
+
+@section PageTabs {
+<div class="ds-page-tabs">
+    <a class="ds-tab active" href="#" data-tab="generate"><i class="bi bi-stars"></i>Generate</a>
+    <a class="ds-tab" href="#" data-tab="history"><i class="bi bi-clock-history"></i>History <span class="badge" id="histBadge">0</span></a>
+    <a class="ds-tab" href="#" data-tab="analyze"><i class="bi bi-graph-up"></i>Vacancy Analyzer</a>
+</div>
+}
+
+<!-- ── GENERATE TAB ──────────────────────────────────── -->
+<div id="tabGenerate">
+
+    <!-- Generate panel -->
+    <div class="gen-panel mb-4">
+        <div class="gen-panel-title"><i class="bi bi-stars" style="color:var(--ds-warm-500)"></i>Generate Listing Copy</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">
+            Generate fresh copy for all selected platforms, or regenerate a specific section with a refinement instruction.
+        </div>
+
+        <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+                <label class="ds-label">Refinement instruction <span style="color:var(--text-tertiary)">(optional)</span></label>
+                <input type="text" id="refinementInput" class="ds-input" placeholder="e.g. Make it more upscale, mention the proximity to schools…" />
+            </div>
+            <button class="btn-ds-accent" id="btnGenerate" onclick="generateFull()">
+                <i class="bi bi-stars"></i>Generate All
+            </button>
+        </div>
+
+        <div style="margin-top:14px">
+            <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px;font-weight:600;">REGENERATE SECTION ONLY</div>
+            <div class="regen-chips">
+                <div class="regen-chip" data-section="LTR" onclick="selectRegen(this)"><i class="bi bi-house-door me-1"></i>LTR Copy</div>
+                <div class="regen-chip" data-section="STR" onclick="selectRegen(this)"><i class="bi bi-calendar-week me-1"></i>STR Copy</div>
+                <div class="regen-chip" data-section="Social" onclick="selectRegen(this)"><i class="bi bi-instagram me-1"></i>Social</div>
+                <div class="regen-chip" data-section="Headlines" onclick="selectRegen(this)"><i class="bi bi-fonts me-1"></i>Headlines</div>
+            </div>
+            <button class="btn-ds-ghost d-none" id="btnRegen" onclick="regenerateSection()">
+                <i class="bi bi-arrow-clockwise"></i>Regenerate Selected
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="gen-loading" id="genLoading">
+        <div class="gen-loading-spinner"></div>
+        <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px">Generating your listing copy…</div>
+        <div style="font-size:13px;color:var(--text-tertiary)">This takes about 10–15 seconds</div>
+    </div>
+
+    <!-- Output grid -->
+    <div id="outputGrid" class="output-grid">
+        <!-- Empty state -->
+        <div style="grid-column:1/-1" class="ds-empty" id="outputEmpty">
+            <div class="ds-empty-icon"><i class="bi bi-file-earmark-text"></i></div>
+            <p style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:4px">No listings generated yet</p>
+            <p style="font-size:13px;margin-bottom:16px">Click "Generate All" to create your first listing copy.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ── HISTORY TAB ───────────────────────────────────── -->
+<div id="tabHistory" class="d-none">
+    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:20px;box-shadow:var(--shadow-sm)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <span style="font-size:14px;font-weight:700">Generation History</span>
+        </div>
+        <div id="historyList">
+            <div class="ds-empty"><div class="ds-empty-icon"><i class="bi bi-clock-history"></i></div><p style="font-size:13px">No history yet.</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- ── ANALYZE TAB ───────────────────────────────────── -->
+<div id="tabAnalyze" class="d-none">
+    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow-sm);max-width:680px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+            <div>
+                <div style="font-size:15px;font-weight:700;margin-bottom:4px"><i class="bi bi-graph-up-arrow me-2" style="color:var(--ds-navy-600)"></i>Vacancy Analyzer</div>
+                <div style="font-size:13px;color:var(--text-secondary)">Diagnose why your listing might be underperforming. Pro feature.</div>
+            </div>
+            <div id="analyzerScore" style="display:none" class="analyzer-score good">
+                <span id="scoreVal">—</span>
+                <span style="font-size:10px;font-weight:500">/100</span>
+            </div>
+        </div>
+
+        <div id="analyzerLocked" style="text-align:center;padding:32px 0">
+            <div style="font-size:36px;margin-bottom:12px">🔒</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px;color:var(--text-primary)">Pro Feature</div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px">Upgrade to Pro to access the Vacancy Analyzer.</div>
+            <a href="/Billing" class="btn-ds-accent"><i class="bi bi-stars"></i>Upgrade to Pro</a>
+        </div>
+
+        <div id="analyzerPanel" style="display:none">
+            <div class="form-field mb-3">
+                <label class="ds-label">Days on market</label>
+                <input type="number" id="daysOnMarket" class="ds-input" min="0" placeholder="e.g. 45" style="max-width:160px" />
+            </div>
+            <div class="form-field mb-4">
+                <label class="ds-label">What's happening? <span style="color:var(--text-tertiary)">(optional context)</span></label>
+                <textarea id="analyzerContext" class="ds-input" rows="3" placeholder="High vacancy in the area, recent rent increase, negative reviews…"></textarea>
+            </div>
+            <button class="btn-ds-primary" id="btnAnalyze" onclick="runAnalyzer()">
+                <i class="bi bi-graph-up"></i>Run Analyzer
+            </button>
+
+            <div id="insightsList" style="margin-top:20px;display:none">
+                <div style="font-size:13.5px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">Insights</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var propId = @propId;
+var selectedRegenSection = null;
+var currentGen = null;
+var isPro = false;
+
+// Load property header
+$.ajax({
+    url: '/api/properties/'+propId, method:'GET',
+    success: function(p) {
+        $('#propHeader').html(
+            '<div>'+
+                '<div class="detail-address">'+p.address+'</div>'+
+                '<div class="detail-meta">'+p.city+', '+p.state+' '+p.zip+
+                    ' &bull; '+p.bedrooms+' bd / '+p.bathrooms+' ba'+
+                    (p.squareFootage?' &bull; '+p.squareFootage+' sqft':'')+
+                    (p.monthlyRent?' &bull; $'+Number(p.monthlyRent).toLocaleString()+'/mo':'')+
+                '</div>'+
+            '</div>'+
+            '<div style="display:flex;gap:8px">'+
+                '<a href="/Property/Edit/'+propId+'" class="btn-ds-ghost"><i class="bi bi-pencil"></i>Edit</a>'+
+                '<a href="/Property" class="btn-ds-ghost"><i class="bi bi-arrow-left"></i>All Properties</a>'+
+            '</div>'
+        );
+        document.title = p.address + ' — DwellScript';
+    }
+});
+
+// Tabs
+$('.ds-tab').on('click', function(e) {
+    e.preventDefault();
+    var tab = $(this).data('tab');
+    $('.ds-tab').removeClass('active');
+    $(this).addClass('active');
+    $('#tabGenerate,#tabHistory,#tabAnalyze').addClass('d-none');
+    if (tab==='generate') { $('#tabGenerate').removeClass('d-none'); loadLatestGen(); }
+    if (tab==='history')  { $('#tabHistory').removeClass('d-none'); loadHistory(); }
+    if (tab==='analyze')  { $('#tabAnalyze').removeClass('d-none'); checkProAccess(); }
+});
+
+// Regen section selection
+function selectRegen(el) {
+    var sec = $(el).data('section');
+    if (selectedRegenSection === sec) {
+        selectedRegenSection = null;
+        $(el).removeClass('selected');
+        $('#btnRegen').addClass('d-none');
+    } else {
+        selectedRegenSection = sec;
+        $('.regen-chip').removeClass('selected');
+        $(el).addClass('selected');
+        $('#btnRegen').removeClass('d-none');
+    }
+}
+
+// Generate full
+function generateFull() {
+    var $btn = $('#btnGenerate');
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Generating…');
+    $('#outputEmpty').hide();
+    $('#outputGrid').html('');
+    $('#genLoading').show();
+
+    $.ajax({
+        url: '/api/generation/generate',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            propertyId: propId,
+            refinementInstruction: $('#refinementInput').val().trim()
+        }),
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function(gen) {
+            currentGen = gen;
+            renderOutputs(gen);
+            loadHistory();
+        },
+        error: function(xhr) {
+            var msg = xhr.responseJSON?.message || 'Generation failed. Please try again.';
+            toastr.error(msg);
+            $('#outputEmpty').show();
+        },
+        complete: function() {
+            $btn.prop('disabled', false).html('<i class="bi bi-stars"></i>Generate All');
+            $('#genLoading').hide();
+        }
+    });
+}
+
+// Regen section
+function regenerateSection() {
+    if (!selectedRegenSection) return;
+    var $btn = $('#btnRegen');
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Regenerating…');
+    $('#genLoading').show();
+
+    $.ajax({
+        url: '/api/generation/regen-section',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            propertyId: propId,
+            section: selectedRegenSection,
+            instruction: $('#refinementInput').val().trim()
+        }),
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function(gen) {
+            currentGen = gen;
+            renderOutputs(gen);
+            loadHistory();
+        },
+        error: function(xhr) {
+            toastr.error(xhr.responseJSON?.message || 'Regeneration failed.');
+        },
+        complete: function() {
+            $btn.prop('disabled', false).html('<i class="bi bi-arrow-clockwise"></i>Regenerate Selected');
+            $('#genLoading').hide();
+        }
+    });
+}
+
+// Load latest generation
+function loadLatestGen() {
+    $.ajax({
+        url: '/api/generation/latest/'+propId, method:'GET',
+        success: function(gen) {
+            if (gen) { currentGen=gen; renderOutputs(gen); }
+        }
+    });
+}
+
+function renderOutputs(gen) {
+    var html = '';
+    if (gen.ltrOutput) html += outputCard('Long-Term Rental (LTR)', 'bi-house-door', 'ds-tag-ltr', gen.ltrOutput, 'ltr');
+    if (gen.strOutput) html += outputCard('Short-Term / Airbnb (STR)', 'bi-calendar-week', 'ds-tag-str', gen.strOutput, 'str');
+    if (gen.socialOutput) html += outputCard('Social Media Caption', 'bi-instagram', 'ds-tag-social', gen.socialOutput, 'social');
+    if (gen.headlinesJson) {
+        try {
+            var heads = JSON.parse(gen.headlinesJson);
+            html += headlinesCard(heads);
+        } catch(e){}
+    }
+    if (!html) { $('#outputGrid').html('<div style="grid-column:1/-1" class="ds-empty"><div class="ds-empty-icon"><i class="bi bi-file-earmark-text"></i></div><p>No outputs yet.</p></div>'); return; }
+    $('#outputGrid').html(html);
+}
+
+function outputCard(title, icon, tag, body, key) {
+    return '<div class="output-card">'+
+        '<div class="output-card-header">'+
+            '<div class="output-card-title"><i class="bi '+icon+'" style="font-size:15px"></i>'+title+'</div>'+
+            '<div class="output-card-actions">'+
+                '<button class="output-action-btn" onclick="copyOutput(\''+key+'\')"><i class="bi bi-copy"></i>Copy</button>'+
+            '</div>'+
+        '</div>'+
+        '<div class="output-body" id="out-'+key+'">'+escHtml(body)+'</div>'+
+    '</div>';
+}
+
+function headlinesCard(heads) {
+    var items = heads.map(function(h, i) {
+        return '<li class="headline-item">'+
+            '<span class="headline-num">#'+(i+1)+'</span>'+
+            '<span class="headline-text">'+escHtml(h)+'</span>'+
+            '<button class="headline-copy" onclick="copyText(\''+escAttr(h)+'\')"><i class="bi bi-copy"></i></button>'+
+        '</li>';
+    }).join('');
+    return '<div class="output-card">'+
+        '<div class="output-card-header">'+
+            '<div class="output-card-title"><i class="bi bi-fonts" style="font-size:15px"></i>Listing Headlines</div>'+
+            '<div class="output-card-actions">'+
+                '<button class="output-action-btn" onclick="copyAllHeadlines()"><i class="bi bi-copy"></i>Copy All</button>'+
+            '</div>'+
+        '</div>'+
+        '<div class="output-body"><ul class="headlines-list">'+items+'</ul></div>'+
+    '</div>';
+}
+
+function copyOutput(key) {
+    var text = $('#out-'+key).text();
+    copyText(text);
+}
+
+function copyAllHeadlines() {
+    if (!currentGen?.headlinesJson) return;
+    try { copyText(JSON.parse(currentGen.headlinesJson).join('\n')); } catch(e){}
+}
+
+function copyText(text) {
+    navigator.clipboard.writeText(text).then(function(){ showCopied('Text'); });
+}
+
+// History
+function loadHistory() {
+    $.ajax({
+        url: '/api/generation/history/'+propId, method:'GET',
+        success: function(items) {
+            $('#histBadge').text(items.length);
+            if (!items.length) {
+                $('#historyList').html('<div class="ds-empty"><div class="ds-empty-icon"><i class="bi bi-clock-history"></i></div><p style="font-size:13px">No history yet.</p></div>');
+                return;
+            }
+            var html = items.map(function(g) {
+                var typeLabel = ['Full Generation','Section Regen','Analyzer Applied'][g.type]||'Generation';
+                var date = new Date(g.createdAt).toLocaleString();
+                return '<div class="history-item">'+
+                    '<div class="history-icon"><i class="bi bi-file-text"></i></div>'+
+                    '<div class="history-info">'+
+                        '<div class="history-type">'+typeLabel+'</div>'+
+                        '<div class="history-date">'+date+'</div>'+
+                    '</div>'+
+                    '<button class="output-action-btn" onclick="loadGen('+g.id+')"><i class="bi bi-eye"></i>View</button>'+
+                    '<button class="output-action-btn" style="color:var(--ds-error)" onclick="deleteGen('+g.id+')"><i class="bi bi-trash"></i></button>'+
+                '</div>';
+            }).join('');
+            $('#historyList').html(html);
+        }
+    });
+}
+
+function loadGen(id) {
+    $.ajax({
+        url: '/api/generation/'+id, method:'GET',
+        success: function(gen) {
+            currentGen=gen;
+            $('.ds-tab[data-tab="generate"]').trigger('click');
+            renderOutputs(gen);
+        }
+    });
+}
+
+function deleteGen(id) {
+    if (!confirm('Delete this generation?')) return;
+    $.ajax({
+        url: '/api/generation/'+id, method:'DELETE',
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function(){ toastr.success('Deleted.'); loadHistory(); },
+        error: function(){ toastr.error('Failed to delete.'); }
+    });
+}
+
+// Analyzer
+function checkProAccess() {
+    $.ajax({
+        url: '/api/billing/status', method:'GET',
+        success: function(s) {
+            isPro = s.tier === 'Pro';
+            if (isPro) {
+                $('#analyzerLocked').hide();
+                $('#analyzerPanel').show();
+            }
+        }
+    });
+}
+
+function runAnalyzer() {
+    var $btn = $('#btnAnalyze');
+    $btn.prop('disabled',true).html('<span class="spinner-border spinner-border-sm me-2"></span>Analyzing…');
+
+    $.ajax({
+        url: '/api/analyzer/analyze',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            propertyId: propId,
+            daysOnMarket: parseInt($('#daysOnMarket').val()) || 0,
+            context: $('#analyzerContext').val().trim()
+        }),
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function(res) {
+            renderAnalyzer(res);
+        },
+        error: function(xhr) {
+            toastr.error(xhr.responseJSON?.message || 'Analysis failed.');
+        },
+        complete: function() {
+            $btn.prop('disabled',false).html('<i class="bi bi-graph-up"></i>Run Analyzer');
+        }
+    });
+}
+
+function renderAnalyzer(res) {
+    var score = res.score || 0;
+    var cls = score>=75?'good':score>=50?'warn':'bad';
+    $('#scoreVal').text(score);
+    $('#analyzerScore').attr('class','analyzer-score '+cls).show();
+
+    var items = (res.insights||[]).map(function(ins) {
+        var color = ins.severity==='high'?'var(--ds-error)':ins.severity==='medium'?'var(--ds-warning)':'var(--ds-success)';
+        return '<div class="insight-item">'+
+            '<div class="insight-dot" style="background:'+color+'"></div>'+
+            '<div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:var(--text-primary);margin-bottom:2px">'+escHtml(ins.title)+'</div>'+
+            '<div style="font-size:13px;color:var(--text-secondary)">'+escHtml(ins.detail)+'</div></div>'+
+        '</div>';
+    }).join('');
+    $('#insightsList').html('<div style="font-size:13.5px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">Insights</div>'+items).show();
+}
+
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escAttr(s) {
+    return String(s).replace(/'/g,"\\'");
+}
+
+// Init
+loadLatestGen();
+loadHistory();
+</script>
+}

@@ -61,13 +61,16 @@ builder.Services.AddScoped<SubscriptionService>();
 builder.Services.AddScoped<VacancyAnalyzerService>();
 builder.Services.AddScoped<FairHousingFilter>();
 
-// ── MVC (require auth by default) ─────────────────────────────────────────────
+// ── MVC + API (require auth by default) ───────────────────────────────────────
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(
         new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()));
 });
-builder.Services.AddAntiforgery();
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";  // allows AJAX to pass token via header
+});
 
 var app = builder.Build();
 
@@ -85,6 +88,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // ── Routes ────────────────────────────────────────────────────────────────────
+app.MapControllers();   // attribute-routed API controllers
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

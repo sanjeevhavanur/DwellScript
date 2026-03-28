@@ -1,0 +1,282 @@
+@{
+    ViewData["Title"] = "Billing";
+}
+
+<style>
+.billing-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:860px; }
+@@media (max-width:768px) { .billing-grid { grid-template-columns:1fr; } }
+
+/* Plan cards */
+.plan-card { background:var(--bg-surface); border:2px solid var(--border); border-radius:var(--radius-2xl); padding:24px; box-shadow:var(--shadow-sm); transition:var(--transition-base); position:relative; overflow:hidden; }
+.plan-card.current { border-color:var(--ds-navy-600); }
+.plan-card.recommended { border-color:var(--ds-warm-500); }
+
+.plan-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:var(--radius-full); font-size:11px; font-weight:700; margin-bottom:12px; }
+.plan-badge.current-badge { background:var(--ds-navy-100); color:var(--ds-navy-700); }
+.plan-badge.popular-badge { background:var(--ds-warm-100); color:var(--ds-warm-700); }
+
+.plan-name { font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:4px; }
+.plan-price { font-size:32px; font-weight:800; color:var(--text-primary); line-height:1; margin-bottom:4px; }
+.plan-price sup { font-size:16px; font-weight:600; vertical-align:top; margin-top:6px; margin-right:2px; }
+.plan-price-sub { font-size:13px; color:var(--text-tertiary); margin-bottom:20px; }
+.plan-period-toggle { display:flex; align-items:center; gap:8px; margin-bottom:20px; font-size:13px; color:var(--text-secondary); }
+.plan-period-toggle input[type=checkbox] { width:36px; height:20px; appearance:none; background:var(--border-strong); border-radius:var(--radius-full); cursor:pointer; position:relative; transition:var(--transition-base); }
+.plan-period-toggle input[type=checkbox]:checked { background:var(--ds-navy-700); }
+.plan-period-toggle input[type=checkbox]::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; transition:var(--transition-base); }
+.plan-period-toggle input[type=checkbox]:checked::after { left:18px; }
+
+.plan-features { list-style:none; padding:0; margin:0 0 20px; display:flex; flex-direction:column; gap:10px; }
+.plan-feature { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-secondary); }
+.plan-feature i { font-size:14px; }
+.plan-feature.has { color:var(--text-primary); }
+.plan-feature.has i { color:var(--ds-success); }
+.plan-feature.no i { color:var(--text-tertiary); }
+
+/* Usage card */
+.usage-card { background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-2xl); padding:24px; box-shadow:var(--shadow-sm); }
+.usage-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+.usage-row:last-child { border-bottom:none; }
+
+/* Invoice table */
+.invoice-table { width:100%; border-collapse:collapse; }
+.invoice-table th { font-size:12px; font-weight:600; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.04em; padding:8px 12px; border-bottom:1px solid var(--border); text-align:left; }
+.invoice-table td { font-size:13.5px; padding:12px; border-bottom:1px solid var(--border); color:var(--text-primary); }
+.invoice-table tr:last-child td { border-bottom:none; }
+.invoice-table tr:hover td { background:var(--bg-surface-2); }
+</style>
+
+@Html.AntiForgeryToken()
+
+<!-- Current plan summary -->
+<div style="max-width:860px;margin-bottom:24px">
+    <div id="currentPlanBanner" class="usage-card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+        <div>
+            <div class="skeleton" style="height:16px;width:160px;margin-bottom:8px;border-radius:6px"></div>
+            <div class="skeleton" style="height:12px;width:220px;border-radius:6px"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Plans -->
+<div style="margin-bottom:12px;display:flex;align-items:center;gap:12px">
+    <div style="font-size:15px;font-weight:700">Plans</div>
+    <label class="plan-period-toggle">
+        <input type="checkbox" id="annualToggle" />
+        <span>Annual <span style="background:var(--ds-success-bg);color:var(--ds-success);padding:1px 7px;border-radius:var(--radius-full);font-size:11px;font-weight:700;margin-left:4px">Save 20%</span></span>
+    </label>
+</div>
+
+<div class="billing-grid mb-4">
+
+    <!-- Starter -->
+    <div class="plan-card" id="planStarter">
+        <div class="plan-badge popular-badge"><i class="bi bi-fire"></i>Most Popular</div>
+        <div class="plan-name">Starter</div>
+        <div class="plan-price"><sup>$</sup><span id="starterPrice">19</span></div>
+        <div class="plan-price-sub" id="starterPriceSub">per month, billed monthly</div>
+        <ul class="plan-features">
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Up to 5 properties</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>30 generations / month</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>LTR + STR + Social copy</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Section refinement</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Generation history</li>
+            <li class="plan-feature no"><i class="bi bi-x-circle"></i>Vacancy Analyzer</li>
+            <li class="plan-feature no"><i class="bi bi-x-circle"></i>Unlimited properties</li>
+        </ul>
+        <button class="btn-ds-accent w-100" id="btnStarter" onclick="checkout('starter')">
+            <i class="bi bi-stars"></i>Get Starter
+        </button>
+    </div>
+
+    <!-- Pro -->
+    <div class="plan-card recommended" id="planPro">
+        <div class="plan-badge popular-badge" style="background:var(--ds-navy-100);color:var(--ds-navy-700)"><i class="bi bi-stars"></i>Pro</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price"><sup>$</sup><span id="proPrice">49</span></div>
+        <div class="plan-price-sub" id="proPriceSub">per month, billed monthly</div>
+        <ul class="plan-features">
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Unlimited properties</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Unlimited generations</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>LTR + STR + Social copy</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Section refinement</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Generation history</li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i><strong>Vacancy Analyzer</strong></li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Priority support</li>
+        </ul>
+        <button class="btn-ds-primary w-100" id="btnPro" onclick="checkout('pro')">
+            <i class="bi bi-stars"></i>Get Pro
+        </button>
+    </div>
+
+</div>
+
+<!-- Usage stats -->
+<div style="max-width:860px;margin-bottom:24px">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px">Usage This Month</div>
+    <div class="usage-card">
+        <div id="usageRows">
+            <div class="usage-row">
+                <div class="skeleton" style="height:14px;width:120px;border-radius:6px"></div>
+                <div class="skeleton" style="height:14px;width:60px;border-radius:6px"></div>
+            </div>
+            <div class="usage-row">
+                <div class="skeleton" style="height:14px;width:100px;border-radius:6px"></div>
+                <div class="skeleton" style="height:14px;width:40px;border-radius:6px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invoices -->
+<div style="max-width:860px;margin-bottom:24px">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px">Billing History</div>
+    <div class="usage-card" style="padding:0;overflow:hidden">
+        <div id="invoiceTableWrap">
+            <table class="invoice-table">
+                <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+                <tbody id="invoiceTbody"><tr><td colspan="5" style="text-align:center;color:var(--text-tertiary);padding:24px">Loading…</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel subscription -->
+<div style="max-width:860px" id="cancelSection" class="d-none">
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px">Subscription</div>
+    <div class="usage-card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+            <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Manage your subscription</div>
+            <div style="font-size:13px;color:var(--text-secondary)">Cancel anytime. Access continues until end of billing period.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+            <button class="btn-ds-ghost" onclick="openPortal()"><i class="bi bi-gear"></i>Manage in Stripe</button>
+            <button class="btn-ds-ghost" style="color:var(--ds-error);border-color:var(--ds-error)" onclick="cancelSub()"><i class="bi bi-x-circle"></i>Cancel</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var isAnnual = false;
+var prices = { starter: { monthly: 19, annual: 15 }, pro: { monthly: 49, annual: 39 } };
+
+// Annual toggle
+$('#annualToggle').on('change', function() {
+    isAnnual = $(this).is(':checked');
+    updatePrices();
+});
+
+function updatePrices() {
+    var sm = isAnnual ? prices.starter.annual : prices.starter.monthly;
+    var pm = isAnnual ? prices.pro.annual : prices.pro.monthly;
+    $('#starterPrice').text(sm);
+    $('#proPrice').text(pm);
+    $('#starterPriceSub').text('per month, billed '+(isAnnual?'annually':'monthly'));
+    $('#proPriceSub').text('per month, billed '+(isAnnual?'annually':'monthly'));
+}
+
+// Load billing status
+$.ajax({
+    url: '/api/billing/status', method:'GET',
+    success: function(s) {
+        var tier = s.tier || 'Free';
+        var next = s.nextBillingDate ? new Date(s.nextBillingDate).toLocaleDateString() : null;
+        $('#currentPlanBanner').html(
+            '<div>'+
+                '<div style="font-size:15px;font-weight:700;margin-bottom:3px">Current Plan: '+
+                    '<span class="ds-pill ds-pill-'+tier.toLowerCase()+' ms-2">'+tier+'</span>'+
+                '</div>'+
+                (next?'<div style="font-size:13px;color:var(--text-secondary)">Next billing date: '+next+'</div>':
+                       '<div style="font-size:13px;color:var(--text-secondary)">No active subscription</div>')+
+            '</div>'+
+            (tier!=='Free'?'<button class="btn-ds-ghost" onclick="openPortal()"><i class="bi bi-gear"></i>Manage Subscription</button>':'')
+        );
+
+        // Mark current plan
+        if (tier==='Starter') { $('#planStarter').addClass('current'); $('#btnStarter').html('<i class="bi bi-check-circle-fill"></i>Current Plan').prop('disabled',true); }
+        if (tier==='Pro')     { $('#planPro').addClass('current');     $('#btnPro').html('<i class="bi bi-check-circle-fill"></i>Current Plan').prop('disabled',true); }
+        if (tier!=='Free')    { $('#cancelSection').removeClass('d-none'); }
+
+        // Usage
+        var usageHtml =
+            '<div class="usage-row"><span style="font-size:13.5px;color:var(--text-secondary)">Generations used</span><span style="font-size:13.5px;font-weight:700">'+s.generationsUsed+' / '+(s.generationsMax||'∞')+'</span></div>'+
+            '<div class="usage-row"><span style="font-size:13.5px;color:var(--text-secondary)">Properties</span><span style="font-size:13.5px;font-weight:700">'+s.propertyCount+' / '+(s.propertyMax||'∞')+'</span></div>';
+        $('#usageRows').html(usageHtml);
+    },
+    error: function() {
+        $('#currentPlanBanner').html('<div style="font-size:13px;color:var(--text-secondary)">Could not load billing info.</div>');
+    }
+});
+
+// Load invoices
+$.ajax({
+    url: '/api/billing/invoices', method:'GET',
+    success: function(items) {
+        if (!items.length) {
+            $('#invoiceTbody').html('<tr><td colspan="5" style="text-align:center;color:var(--text-tertiary);padding:24px">No invoices yet.</td></tr>');
+            return;
+        }
+        var html = items.map(function(inv) {
+            var date = new Date(inv.date).toLocaleDateString();
+            var statusColor = inv.status==='paid'?'var(--ds-success)':'var(--ds-warning)';
+            return '<tr>'+
+                '<td>'+date+'</td>'+
+                '<td>'+escHtml(inv.description)+'</td>'+
+                '<td style="font-weight:600">$'+inv.amount.toFixed(2)+'</td>'+
+                '<td><span style="color:'+statusColor+';font-weight:600;text-transform:capitalize">'+inv.status+'</span></td>'+
+                '<td><a href="#" onclick="downloadInvoice(\''+inv.id+'\');return false;" style="font-size:12px;color:var(--ds-navy-600);font-weight:600"><i class="bi bi-download"></i></a></td>'+
+            '</tr>';
+        }).join('');
+        $('#invoiceTbody').html(html);
+    },
+    error: function() {
+        $('#invoiceTbody').html('<tr><td colspan="5" style="text-align:center;color:var(--text-tertiary);padding:24px">Could not load invoices.</td></tr>');
+    }
+});
+
+function checkout(tier) {
+    var $btn = tier==='starter' ? $('#btnStarter') : $('#btnPro');
+    $btn.prop('disabled',true).html('<span class="spinner-border spinner-border-sm me-2"></span>Redirecting…');
+    $.ajax({
+        url: '/api/billing/checkout', method:'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ tier: tier, annual: isAnnual }),
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function(res) {
+            if (res.url) window.location.href = res.url;
+        },
+        error: function(xhr) {
+            toastr.error(xhr.responseJSON?.message || 'Could not start checkout.');
+            $btn.prop('disabled',false);
+            updatePrices();
+        }
+    });
+}
+
+function openPortal() {
+    $.ajax({
+        url: '/api/billing/portal', method:'GET',
+        success: function(res) { if (res.url) window.location.href = res.url; },
+        error: function() { toastr.error('Could not open billing portal.'); }
+    });
+}
+
+function cancelSub() {
+    if (!confirm('Cancel your subscription? You will retain access until the end of the billing period.')) return;
+    $.ajax({
+        url: '/api/billing/subscription', method:'DELETE',
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function() { toastr.success('Subscription cancelled.'); setTimeout(function(){ location.reload(); },1500); },
+        error: function(xhr) { toastr.error(xhr.responseJSON?.message || 'Failed to cancel.'); }
+    });
+}
+
+function downloadInvoice(id) {
+    window.open('/api/billing/invoice/'+id, '_blank');
+}
+
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+}

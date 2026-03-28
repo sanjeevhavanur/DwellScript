@@ -1,8 +1,629 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "DwellScript — AI Rental Listings";
+    Layout = "_AuthLayout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+/* ── Landing Page ─────────────────────────────────── */
+.lp-body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-primary); }
+
+/* Hero */
+.lp-hero {
+    background: var(--ds-navy-900);
+    background-image:
+        radial-gradient(ellipse at 15% 60%, rgba(37,99,235,.22) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(249,115,22,.14) 0%, transparent 50%);
+    padding: 80px 24px 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.lp-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0; right: 0;
+    height: 60px;
+    background: var(--bg-page);
+    clip-path: ellipse(55% 100% at 50% 100%);
+}
+
+.lp-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 999px;
+    padding: 5px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,.8);
+    margin-bottom: 24px;
+    background: rgba(255,255,255,.05);
+}
+
+.lp-hero-title {
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    letter-spacing: -.02em;
+}
+
+.lp-hero-title .accent { color: var(--ds-warm-400); }
+
+.lp-hero-sub {
+    font-size: 17px;
+    color: rgba(255,255,255,.6);
+    max-width: 540px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+}
+
+.lp-hero-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+}
+
+.lp-btn-primary {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--ds-warm-600), var(--ds-warm-500));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 6px 20px rgba(234,88,12,.35);
+    transition: all .2s cubic-bezier(.34,1.56,.64,1);
+}
+
+.lp-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(234,88,12,.45);
+    color: #fff;
+}
+
+.lp-btn-ghost {
+    padding: 13px 24px;
+    background: transparent;
+    color: rgba(255,255,255,.8);
+    border: 1.5px solid rgba(255,255,255,.25);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s ease;
+}
+
+.lp-btn-ghost:hover { background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.45); }
+
+/* Stats bar */
+.lp-stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+}
+
+.lp-stat { text-align: center; }
+.lp-stat-num { font-size: 26px; font-weight: 800; color: #fff; line-height: 1; }
+.lp-stat-label { font-size: 12px; color: rgba(255,255,255,.45); margin-top: 4px; }
+
+/* Preview card floating */
+.lp-preview {
+    max-width: 580px;
+    margin: 40px auto 0;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    padding: 20px 24px;
+    backdrop-filter: blur(12px);
+    text-align: left;
+    animation: float 3.5s ease-in-out infinite alternate;
+}
+
+.lp-preview-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.lp-preview-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ds-warm-500); animation: breathe 2s ease-in-out infinite; }
+.lp-preview-label { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.7); }
+.lp-preview-tags { display: flex; gap: 6px; margin-left: auto; }
+.lp-preview-tag { padding: 2px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+
+.lp-preview-lines { display: flex; flex-direction: column; gap: 7px; }
+.lp-preview-line { height: 9px; border-radius: 5px; background: rgba(255,255,255,.12); }
+
+/* Section wrapper */
+.lp-section { padding: 80px 24px; }
+.lp-container { max-width: 1080px; margin: 0 auto; }
+.lp-section-eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ds-warm-600); margin-bottom: 10px; }
+.lp-section-title { font-size: clamp(24px, 3.5vw, 36px); font-weight: 800; color: var(--text-primary); line-height: 1.25; margin-bottom: 14px; }
+.lp-section-sub { font-size: 15px; color: var(--text-secondary); max-width: 520px; line-height: 1.7; }
+
+/* Feature grid */
+.lp-features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 48px; }
+
+.lp-feature-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    transition: all .25s cubic-bezier(.34,1.56,.64,1);
+}
+
+.lp-feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--ds-navy-200); }
+
+.lp-feature-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 18px;
+}
+
+.lp-feature-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+.lp-feature-desc { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; }
+
+/* How it works */
+.lp-steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0; margin-top: 48px; position: relative; }
+.lp-steps::before { content: ''; position: absolute; top: 28px; left: 15%; right: 15%; height: 2px; background: linear-gradient(90deg, var(--ds-navy-100), var(--ds-warm-100)); z-index: 0; }
+
+.lp-step { text-align: center; padding: 0 16px; position: relative; z-index: 1; }
+.lp-step-num {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800;
+    margin: 0 auto 16px;
+    border: 3px solid var(--border);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-md);
+}
+
+.lp-step-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+.lp-step-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+/* Platforms */
+.lp-platforms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-top: 40px; }
+.lp-platform-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.lp-platform-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.lp-platform-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.lp-platform-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+
+/* Pricing */
+.lp-pricing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; margin-top: 48px; max-width: 860px; margin-left: auto; margin-right: auto; }
+.lp-price-card {
+    background: var(--bg-surface);
+    border: 2px solid var(--border);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    transition: all .2s ease;
+}
+
+.lp-price-card:hover { box-shadow: var(--shadow-lg); }
+.lp-price-card.featured { border-color: var(--ds-warm-500); background: linear-gradient(160deg, #fff 60%, var(--ds-warm-50)); }
+
+.lp-price-name { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.lp-price-amt { font-size: 36px; font-weight: 800; color: var(--text-primary); line-height: 1; margin: 12px 0 4px; }
+.lp-price-amt sup { font-size: 18px; font-weight: 600; vertical-align: top; margin-top: 7px; }
+.lp-price-period { font-size: 13px; color: var(--text-tertiary); margin-bottom: 20px; }
+.lp-price-features { list-style: none; padding: 0; margin: 0 0 24px; display: flex; flex-direction: column; gap: 10px; }
+.lp-price-feature { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text-secondary); }
+.lp-price-feature i { font-size: 14px; color: var(--ds-success); }
+.lp-price-feature.no i { color: var(--text-tertiary); }
+.lp-price-feature.no { color: var(--text-tertiary); }
+
+/* Social proof */
+.lp-testimonials { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 48px; }
+.lp-testimonial {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.lp-quote { font-size: 14px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 18px; font-style: italic; }
+.lp-quote::before { content: '"'; font-size: 36px; color: var(--ds-warm-400); line-height: 0; vertical-align: -14px; margin-right: 4px; }
+.lp-testimonial-author { display: flex; align-items: center; gap: 10px; }
+.lp-author-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.lp-author-name { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+.lp-author-title { font-size: 12px; color: var(--text-tertiary); }
+
+/* CTA section */
+.lp-cta-section {
+    background: var(--ds-navy-900);
+    background-image: radial-gradient(ellipse at 30% 50%, rgba(249,115,22,.15) 0%, transparent 55%),
+                      radial-gradient(ellipse at 80% 30%, rgba(37,99,235,.2) 0%, transparent 50%);
+    padding: 80px 24px;
+    text-align: center;
+}
+
+/* Footer */
+.lp-footer { background: var(--ds-navy-900); border-top: 1px solid rgba(255,255,255,.08); padding: 32px 24px; text-align: center; }
+.lp-footer-text { font-size: 13px; color: rgba(255,255,255,.35); }
+.lp-footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+.lp-footer-links a { font-size: 13px; color: rgba(255,255,255,.45); text-decoration: none; }
+.lp-footer-links a:hover { color: rgba(255,255,255,.8); }
+
+@@media (max-width: 600px) {
+    .lp-steps::before { display: none; }
+    .lp-stats { gap: 28px; }
+}
+</style>
+
+<div class="lp-body">
+
+    <!-- ── Navbar ──────────────────────────────────────── -->
+    <nav style="position:sticky;top:0;z-index:200;background:rgba(15,31,61,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;">
+        <div style="max-width:1080px;margin:0 auto;height:60px;display:flex;align-items:center;justify-content:space-between;">
+            <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--ds-warm-500),var(--ds-warm-600));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;box-shadow:var(--shadow-warm);">D</div>
+                <span style="font-size:16px;font-weight:700;color:#fff;">Dwell<span style="color:var(--ds-warm-400)">Script</span></span>
+            </a>
+            <div style="display:flex;align-items:center;gap:16px;">
+                <a href="#features" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;">Features</a>
+                <a href="#pricing" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;">Pricing</a>
+                <a href="/Auth/Login" class="lp-btn-primary" style="padding:9px 20px;font-size:13.5px;">Get Started Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Hero ────────────────────────────────────────── -->
+    <section class="lp-hero">
+        <div class="lp-container">
+            <div class="lp-eyebrow">
+                <i class="bi bi-stars" style="color:var(--ds-warm-400)"></i>
+                Powered by Claude AI
+            </div>
+
+            <h1 class="lp-hero-title">
+                Stop struggling with<br>rental listing copy.<br>
+                <span class="accent">Write it in seconds.</span>
+            </h1>
+
+            <p class="lp-hero-sub">
+                DwellScript uses AI to generate professional LTR, STR, social captions, and headlines for your rental properties — Fair Housing compliant, every time.
+            </p>
+
+            <div class="lp-hero-cta">
+                <a href="/Auth/Login" class="lp-btn-primary">
+                    <i class="bi bi-stars"></i>Start for Free
+                </a>
+                <a href="#how-it-works" class="lp-btn-ghost">
+                    <i class="bi bi-play-circle"></i>See how it works
+                </a>
+            </div>
+
+            <div class="lp-stats">
+                <div class="lp-stat">
+                    <div class="lp-stat-num">500+</div>
+                    <div class="lp-stat-label">Independent landlords</div>
+                </div>
+                <div class="lp-stat">
+                    <div class="lp-stat-num">10K+</div>
+                    <div class="lp-stat-label">Listings generated</div>
+                </div>
+                <div class="lp-stat">
+                    <div class="lp-stat-num">~15s</div>
+                    <div class="lp-stat-label">Per full generation</div>
+                </div>
+                <div class="lp-stat">
+                    <div class="lp-stat-num">100%</div>
+                    <div class="lp-stat-label">Fair Housing compliant</div>
+                </div>
+            </div>
+
+            <div class="lp-preview">
+                <div class="lp-preview-header">
+                    <div class="lp-preview-dot"></div>
+                    <span class="lp-preview-label">Generating listing copy for 3bd/2ba in Chesapeake, VA…</span>
+                    <div class="lp-preview-tags">
+                        <span class="lp-preview-tag" style="background:var(--ds-navy-100);color:var(--ds-navy-700)">LTR</span>
+                        <span class="lp-preview-tag" style="background:var(--ds-warm-100);color:var(--ds-warm-700)">STR</span>
+                        <span class="lp-preview-tag" style="background:#dcfce7;color:#15803d">Social</span>
+                    </div>
+                </div>
+                <div class="lp-preview-lines">
+                    <div class="lp-preview-line" style="width:92%"></div>
+                    <div class="lp-preview-line" style="width:78%"></div>
+                    <div class="lp-preview-line" style="width:85%"></div>
+                    <div class="lp-preview-line" style="width:65%"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Features ────────────────────────────────────── -->
+    <section class="lp-section" id="features">
+        <div class="lp-container">
+            <div class="lp-section-eyebrow">Everything you need</div>
+            <h2 class="lp-section-title">Built for independent landlords,<br>not big property managers.</h2>
+            <p class="lp-section-sub">No marketing degree needed. DwellScript handles the copywriting so you can focus on what matters.</p>
+
+            <div class="lp-features-grid">
+                <div class="lp-feature-card">
+                    <div class="lp-feature-icon" style="background:var(--ds-navy-50);border:1px solid var(--ds-navy-100)"><i class="bi bi-lightning-charge-fill" style="color:var(--ds-navy-600)"></i></div>
+                    <div class="lp-feature-title">One-click generation</div>
+                    <div class="lp-feature-desc">Enter your property details once. Get LTR copy, STR copy, social captions, and 3 headlines — all in a single AI call.</div>
+                </div>
+                <div class="lp-feature-card">
+                    <div class="lp-feature-icon" style="background:#fef9c3;border:1px solid #fef08a;position:relative;font-size:0;gap:0;">
+                        <i class="bi bi-building-fill" style="color:#ca8a04;font-size:22px;position:relative;"></i>
+                        <i class="bi bi-check-circle-fill" style="color:#16a34a;font-size:12px;position:absolute;bottom:8px;right:8px;background:#fff;border-radius:50%;"></i>
+                    </div>
+                    <div class="lp-feature-title">Fair Housing compliance</div>
+                    <div class="lp-feature-desc">Every output is scanned for prohibited language before delivery. Stay protected without having to think about it.</div>
+                </div>
+                <div class="lp-feature-card">
+                    <div class="lp-feature-icon" style="background:#dcfce7;border:1px solid #bbf7d0"><i class="bi bi-arrow-repeat" style="color:#16a34a"></i></div>
+                    <div class="lp-feature-title">Section refinement</div>
+                    <div class="lp-feature-desc">Don't like one section? Regenerate just LTR, STR, social, or headlines with a custom instruction. No need to redo everything.</div>
+                </div>
+                <div class="lp-feature-card">
+                    <div class="lp-feature-icon" style="background:#ede9fe;border:1px solid #ddd6fe"><i class="bi bi-graph-up-arrow" style="color:#7c3aed"></i></div>
+                    <div class="lp-feature-title">Vacancy Analyzer</div>
+                    <div class="lp-feature-desc">Diagnose why a listing isn't converting. Get AI-powered insights on pricing, copy quality, and market positioning. <span style="color:var(--ds-warm-600);font-weight:600">Pro</span></div>
+                </div>
+                <div class="lp-feature-card">
+                    <div class="lp-feature-icon" style="background:var(--ds-warm-50);border:1px solid var(--ds-warm-100)"><i class="bi bi-buildings-fill" style="color:var(--ds-warm-600)"></i></div>
+                    <div class="lp-feature-title">Multi-property dashboard</div>
+                    <div class="lp-feature-desc">Manage all your rentals in one place. Track vacancy status, generation history, and platform targeting per property.</div>
+                </div>
+                <div class="lp-feature-card">
+                    <div class="lp-feature-icon" style="background:#fce7f3;border:1px solid #fbcfe8"><i class="bi bi-clock-history" style="color:#be185d"></i></div>
+                    <div class="lp-feature-title">Generation history</div>
+                    <div class="lp-feature-desc">Every listing you've ever generated is saved. Pull up past copy, compare versions, or restore a previous draft instantly.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── How it works ─────────────────────────────────── -->
+    <section class="lp-section" id="how-it-works" style="background:var(--bg-surface-2)">
+        <div class="lp-container">
+            <div style="text-align:center;margin-bottom:0">
+                <div class="lp-section-eyebrow" style="text-align:center">Simple process</div>
+                <h2 class="lp-section-title" style="text-align:center;margin:0 auto 14px">From empty form to<br>polished listing in 4 steps.</h2>
+            </div>
+
+            <div class="lp-steps">
+                <div class="lp-step">
+                    <div class="lp-step-num" style="background:var(--ds-navy-50);border-color:var(--ds-navy-200)">
+                        <i class="bi bi-house-add-fill" style="color:var(--ds-navy-700)"></i>
+                    </div>
+                    <div class="lp-step-title">Add your property</div>
+                    <div class="lp-step-desc">Enter address, bedrooms, bathrooms, amenities, and rent. Takes under 2 minutes.</div>
+                </div>
+                <div class="lp-step">
+                    <div class="lp-step-num" style="background:var(--ds-warm-50);border-color:var(--ds-warm-200)">
+                        <i class="bi bi-toggles" style="color:var(--ds-warm-600)"></i>
+                    </div>
+                    <div class="lp-step-title">Choose platforms</div>
+                    <div class="lp-step-desc">Select LTR, STR, social, or all three. DwellScript tailors tone and format per channel.</div>
+                </div>
+                <div class="lp-step">
+                    <div class="lp-step-num" style="background:#dcfce7;border-color:#bbf7d0">
+                        <i class="bi bi-stars" style="color:#16a34a"></i>
+                    </div>
+                    <div class="lp-step-title">Generate copy</div>
+                    <div class="lp-step-desc">One click. AI writes your listing in ~15 seconds, scanned for Fair Housing compliance.</div>
+                </div>
+                <div class="lp-step">
+                    <div class="lp-step-num" style="background:#ede9fe;border-color:#ddd6fe">
+                        <i class="bi bi-clipboard-check-fill" style="color:#7c3aed"></i>
+                    </div>
+                    <div class="lp-step-title">Copy & post</div>
+                    <div class="lp-step-desc">Copy to clipboard and paste directly into Zillow, Airbnb, Facebook, or anywhere else.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Platforms ────────────────────────────────────── -->
+    <section class="lp-section">
+        <div class="lp-container">
+            <div class="lp-section-eyebrow">Every format covered</div>
+            <h2 class="lp-section-title">Four output formats,<br>one generation.</h2>
+
+            <div class="lp-platforms-grid">
+                <div class="lp-platform-card">
+                    <div class="lp-platform-icon" style="background:var(--ds-navy-50);border:1px solid var(--ds-navy-100)">
+                        <i class="bi bi-house-door-fill" style="color:var(--ds-navy-700)"></i>
+                    </div>
+                    <div>
+                        <div class="lp-platform-title">Long-Term Rental (LTR)</div>
+                        <div class="lp-platform-desc">Detailed, professional descriptions ideal for Zillow, Apartments.com, MLS, and Craigslist.</div>
+                    </div>
+                </div>
+                <div class="lp-platform-card">
+                    <div class="lp-platform-icon" style="background:var(--ds-warm-50);border:1px solid var(--ds-warm-100)">
+                        <i class="bi bi-calendar-week-fill" style="color:var(--ds-warm-600)"></i>
+                    </div>
+                    <div>
+                        <div class="lp-platform-title">Short-Term / Airbnb (STR)</div>
+                        <div class="lp-platform-desc">Inviting, experience-focused copy tuned for Airbnb, VRBO, and direct booking sites.</div>
+                    </div>
+                </div>
+                <div class="lp-platform-card">
+                    <div class="lp-platform-icon" style="background:#fce7f3;border:1px solid #fbcfe8">
+                        <i class="bi bi-instagram" style="color:#be185d"></i>
+                    </div>
+                    <div>
+                        <div class="lp-platform-title">Social Media Caption</div>
+                        <div class="lp-platform-desc">Punchy, hashtag-ready captions for Instagram, Facebook Marketplace, and TikTok.</div>
+                    </div>
+                </div>
+                <div class="lp-platform-card">
+                    <div class="lp-platform-icon" style="background:#ede9fe;border:1px solid #ddd6fe">
+                        <i class="bi bi-fonts" style="color:#7c3aed"></i>
+                    </div>
+                    <div>
+                        <div class="lp-platform-title">Listing Headlines</div>
+                        <div class="lp-platform-desc">3 attention-grabbing headline variations for the top of any listing platform.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Testimonials ─────────────────────────────────── -->
+    <section class="lp-section" style="background:var(--bg-surface-2)">
+        <div class="lp-container">
+            <div style="text-align:center;margin-bottom:0">
+                <div class="lp-section-eyebrow" style="text-align:center">Loved by landlords</div>
+                <h2 class="lp-section-title" style="text-align:center;margin:0 auto 14px">Real landlords. Real results.</h2>
+            </div>
+            <div class="lp-testimonials">
+                <div class="lp-testimonial">
+                    <p class="lp-quote">I used to spend 2 hours writing listings. Now I get better copy in 15 seconds. DwellScript paid for itself the first week.</p>
+                    <div class="lp-testimonial-author">
+                        <div class="lp-author-avatar" style="background:var(--ds-navy-700)">J</div>
+                        <div>
+                            <div class="lp-author-name">James R.</div>
+                            <div class="lp-author-title">6 properties · Norfolk, VA</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lp-testimonial">
+                    <p class="lp-quote">The Fair Housing filter alone is worth it. I sleep better knowing my listings aren't accidentally violating anything.</p>
+                    <div class="lp-testimonial-author">
+                        <div class="lp-author-avatar" style="background:var(--ds-warm-600)">M</div>
+                        <div>
+                            <div class="lp-author-name">Michelle T.</div>
+                            <div class="lp-author-title">3 properties · Richmond, VA</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lp-testimonial">
+                    <p class="lp-quote">I manage 12 units solo. Having Airbnb and long-term copy generated at the same time saves me a ton of headache.</p>
+                    <div class="lp-testimonial-author">
+                        <div class="lp-author-avatar" style="background:#16a34a">S</div>
+                        <div>
+                            <div class="lp-author-name">Sandra K.</div>
+                            <div class="lp-author-title">12 properties · Virginia Beach, VA</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Pricing ──────────────────────────────────────── -->
+    <section class="lp-section" id="pricing">
+        <div class="lp-container" style="text-align:center">
+            <div class="lp-section-eyebrow">Simple pricing</div>
+            <h2 class="lp-section-title" style="margin:0 auto 14px">Start free. Upgrade when ready.</h2>
+            <p class="lp-section-sub" style="margin:0 auto 0">No credit card required to get started. Cancel anytime.</p>
+
+            <div class="lp-pricing-grid">
+                <div class="lp-price-card">
+                    <div class="lp-price-name">Free</div>
+                    <div class="lp-price-amt"><sup>$</sup>0</div>
+                    <div class="lp-price-period">forever</div>
+                    <ul class="lp-price-features">
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>1 property</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>3 generations / month</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>LTR + STR + Social copy</li>
+                        <li class="lp-price-feature no"><i class="bi bi-x-circle"></i>Section refinement</li>
+                        <li class="lp-price-feature no"><i class="bi bi-x-circle"></i>Vacancy Analyzer</li>
+                    </ul>
+                    <a href="/Auth/Login" class="btn-ds-ghost w-100" style="justify-content:center">Get Started Free</a>
+                </div>
+                <div class="lp-price-card featured">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                        <div class="lp-price-name">Starter</div>
+                        <span style="background:var(--ds-warm-100);color:var(--ds-warm-700);font-size:11px;font-weight:700;padding:2px 10px;border-radius:999px"><i class="bi bi-fire me-1"></i>Popular</span>
+                    </div>
+                    <div class="lp-price-amt"><sup>$</sup>19</div>
+                    <div class="lp-price-period">per month</div>
+                    <ul class="lp-price-features">
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>Up to 5 properties</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>30 generations / month</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>Section refinement</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>Generation history</li>
+                        <li class="lp-price-feature no"><i class="bi bi-x-circle"></i>Vacancy Analyzer</li>
+                    </ul>
+                    <a href="/Auth/Login" class="lp-btn-primary w-100" style="justify-content:center"><i class="bi bi-stars"></i>Get Starter</a>
+                </div>
+                <div class="lp-price-card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                        <div class="lp-price-name">Pro</div>
+                        <span style="background:var(--ds-navy-100);color:var(--ds-navy-700);font-size:11px;font-weight:700;padding:2px 10px;border-radius:999px"><i class="bi bi-stars me-1"></i>Pro</span>
+                    </div>
+                    <div class="lp-price-amt"><sup>$</sup>49</div>
+                    <div class="lp-price-period">per month</div>
+                    <ul class="lp-price-features">
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>Unlimited properties</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>Unlimited generations</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>Section refinement</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i>Generation history</li>
+                        <li class="lp-price-feature"><i class="bi bi-check-circle-fill"></i><strong>Vacancy Analyzer</strong></li>
+                    </ul>
+                    <a href="/Auth/Login" class="btn-ds-primary w-100" style="justify-content:center;background:var(--ds-navy-800)"><i class="bi bi-stars"></i>Get Pro</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Final CTA ─────────────────────────────────────── -->
+    <section class="lp-cta-section">
+        <div class="lp-container">
+            <div class="lp-eyebrow" style="margin:0 auto 20px">
+                <i class="bi bi-lock-fill" style="color:var(--ds-warm-400)"></i>No password required
+            </div>
+            <h2 style="font-size:clamp(26px,4vw,42px);font-weight:800;color:#fff;margin-bottom:14px;line-height:1.2">
+                Your next vacancy fills faster.<br>Start writing in seconds.
+            </h2>
+            <p style="font-size:16px;color:rgba(255,255,255,.55);margin-bottom:36px;max-width:460px;margin-left:auto;margin-right:auto">
+                Sign in with your email or Google. No password needed, ever.
+            </p>
+            <a href="/Auth/Login" class="lp-btn-primary" style="font-size:16px;padding:16px 36px">
+                <i class="bi bi-stars"></i>Get Started — It's Free
+            </a>
+        </div>
+    </section>
+
+    <!-- ── Footer ────────────────────────────────────────── -->
+    <footer class="lp-footer">
+        <div class="lp-footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="/Auth/Login">Sign In</a>
+        </div>
+        <div class="lp-footer-text">&copy; @DateTime.UtcNow.Year DwellScript. All rights reserved.</div>
+    </footer>
+
 </div>

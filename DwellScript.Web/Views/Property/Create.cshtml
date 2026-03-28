@@ -1,0 +1,389 @@
+@{
+    ViewData["Title"] = "Add Property";
+    var isEdit = ViewData["IsEdit"] as bool? ?? false;
+    var propId = ViewData["PropertyId"] as int? ?? 0;
+}
+
+<style>
+.wizard-shell { max-width: 720px; margin: 0 auto; }
+.wizard-steps { display: flex; align-items: center; gap: 0; margin-bottom: 32px; }
+.wizard-step { display: flex; align-items: center; gap: 8px; flex: 1; }
+.wizard-step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; transition: var(--transition-base); }
+.wizard-step-num.done { background: var(--ds-success); color: #fff; }
+.wizard-step-num.active { background: var(--ds-navy-700); color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,.15); }
+.wizard-step-num.pending { background: var(--bg-surface-2); color: var(--text-tertiary); border: 2px solid var(--border-strong); }
+.wizard-step-label { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+.wizard-step-label.active { color: var(--ds-navy-700); }
+.wizard-connector { flex: 1; height: 2px; background: var(--border-strong); margin: 0 8px; border-radius: 1px; }
+.wizard-connector.done { background: var(--ds-success); }
+
+.wizard-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-2xl); padding: 32px; box-shadow: var(--shadow-md); }
+.wizard-section-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.wizard-section-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+
+/* Form grid */
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@@media (max-width: 600px) { .form-grid-2,.form-grid-3 { grid-template-columns: 1fr; } }
+
+.form-field { display: flex; flex-direction: column; gap: 5px; }
+.form-field label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.form-field input, .form-field select, .form-field textarea { padding: 9px 12px; border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--bg-surface); color: var(--text-primary); font-size: 13.5px; font-family: inherit; outline: none; transition: var(--transition-base); width: 100%; }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--ds-navy-600); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.form-field .hint { font-size: 11.5px; color: var(--text-tertiary); }
+.form-field.error input, .form-field.error select { border-color: var(--ds-error); }
+.field-error { font-size: 11.5px; color: var(--ds-error); }
+
+/* Checkbox chips */
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-label { display: flex; align-items: center; gap: 6px; padding: 7px 13px; border: 1.5px solid var(--border-strong); border-radius: var(--radius-full); font-size: 13px; font-weight: 500; cursor: pointer; transition: var(--transition-base); background: var(--bg-surface); color: var(--text-secondary); user-select: none; }
+.chip-label input { display: none; }
+.chip-label:hover { border-color: var(--ds-navy-500); color: var(--ds-navy-700); }
+.chip-label.selected { background: var(--ds-navy-50); border-color: var(--ds-navy-600); color: var(--ds-navy-700); font-weight: 600; }
+
+/* Wizard nav */
+.wizard-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
+</style>
+
+@Html.AntiForgeryToken()
+
+<div class="wizard-shell">
+
+    <!-- Steps indicator -->
+    <div class="wizard-steps" id="wizardSteps">
+        <div class="wizard-step">
+            <div class="wizard-step-num active" id="stepNum1">1</div>
+            <span class="wizard-step-label active" id="stepLabel1">Location</span>
+        </div>
+        <div class="wizard-connector" id="conn1"></div>
+        <div class="wizard-step">
+            <div class="wizard-step-num pending" id="stepNum2">2</div>
+            <span class="wizard-step-label" id="stepLabel2">Details</span>
+        </div>
+        <div class="wizard-connector" id="conn2"></div>
+        <div class="wizard-step">
+            <div class="wizard-step-num pending" id="stepNum3">3</div>
+            <span class="wizard-step-label" id="stepLabel3">Amenities</span>
+        </div>
+        <div class="wizard-connector" id="conn3"></div>
+        <div class="wizard-step">
+            <div class="wizard-step-num pending" id="stepNum4">4</div>
+            <span class="wizard-step-label" id="stepLabel4">Platforms</span>
+        </div>
+    </div>
+
+    <!-- Step panels -->
+    <div class="wizard-card">
+
+        <!-- Step 1: Location -->
+        <div id="panel1">
+            <div class="wizard-section-title">Property Location</div>
+            <div class="wizard-section-sub">Enter the address of your rental property.</div>
+            <div class="form-field mb-3">
+                <label>Street Address *</label>
+                <input type="text" id="address" placeholder="123 Maple Street" />
+                <span class="field-error d-none" id="err-address">Address is required.</span>
+            </div>
+            <div class="form-grid-3">
+                <div class="form-field">
+                    <label>City *</label>
+                    <input type="text" id="city" placeholder="Chesapeake" />
+                    <span class="field-error d-none" id="err-city">City is required.</span>
+                </div>
+                <div class="form-field">
+                    <label>State *</label>
+                    <input type="text" id="state" placeholder="VA" maxlength="2" style="text-transform:uppercase" />
+                    <span class="field-error d-none" id="err-state">State is required.</span>
+                </div>
+                <div class="form-field">
+                    <label>ZIP Code *</label>
+                    <input type="text" id="zip" placeholder="23320" maxlength="10" />
+                    <span class="field-error d-none" id="err-zip">ZIP is required.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Details -->
+        <div id="panel2" class="d-none">
+            <div class="wizard-section-title">Property Details</div>
+            <div class="wizard-section-sub">Tell us about the property specs.</div>
+            <div class="form-grid-2 mb-3">
+                <div class="form-field">
+                    <label>Property Type *</label>
+                    <select id="propertyType">
+                        <option value="">Select type…</option>
+                        <option>House</option>
+                        <option>Apartment</option>
+                        <option>Condo</option>
+                        <option>Townhouse</option>
+                        <option>Studio</option>
+                        <option>Other</option>
+                    </select>
+                    <span class="field-error d-none" id="err-type">Type is required.</span>
+                </div>
+                <div class="form-field">
+                    <label>Status</label>
+                    <select id="status">
+                        <option value="0">Active</option>
+                        <option value="1">Vacant</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid-3 mb-3">
+                <div class="form-field">
+                    <label>Bedrooms *</label>
+                    <input type="number" id="bedrooms" min="0" max="20" placeholder="3" />
+                    <span class="field-error d-none" id="err-beds">Required.</span>
+                </div>
+                <div class="form-field">
+                    <label>Bathrooms *</label>
+                    <input type="number" id="bathrooms" min="0" max="20" step="0.5" placeholder="2" />
+                    <span class="field-error d-none" id="err-baths">Required.</span>
+                </div>
+                <div class="form-field">
+                    <label>Sq. Footage</label>
+                    <input type="number" id="sqft" min="0" placeholder="1200" />
+                </div>
+            </div>
+            <div class="form-grid-2 mb-3">
+                <div class="form-field">
+                    <label>Monthly Rent ($)</label>
+                    <input type="number" id="rent" min="0" step="50" placeholder="1800" />
+                </div>
+                <div class="form-field">
+                    <label>Parking</label>
+                    <input type="text" id="parking" placeholder="1-car garage, street parking…" />
+                </div>
+            </div>
+            <div class="form-field mb-3">
+                <label>Pet Policy</label>
+                <input type="text" id="petPolicy" placeholder="No pets, cats OK, dogs under 25 lbs…" />
+            </div>
+            <div class="form-field">
+                <label>Additional Notes</label>
+                <textarea id="notes" rows="3" placeholder="Any other details to help generate better listings…"></textarea>
+            </div>
+        </div>
+
+        <!-- Step 3: Amenities -->
+        <div id="panel3" class="d-none">
+            <div class="wizard-section-title">Amenities</div>
+            <div class="wizard-section-sub">Select all that apply — these inform the AI copy.</div>
+            <div class="chip-group" id="amenitiesGroup">
+                @foreach (var a in new[] {
+                    "In-unit Washer/Dryer","Washer/Dryer Hookups","Dishwasher","Central AC",
+                    "Hardwood Floors","New Carpet","Stainless Appliances","Granite Countertops",
+                    "Walk-in Closet","Fireplace","Backyard/Patio","Deck/Balcony",
+                    "Gym/Fitness Center","Pool","Storage Unit","EV Charging",
+                    "Smart Home","High-Speed Internet","Cable Ready","Gated Community"
+                })
+                {
+                    <label class="chip-label" onclick="toggleChip(this)">
+                        <input type="checkbox" value="@a" /><span>@a</span>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <!-- Step 4: Platforms -->
+        <div id="panel4" class="d-none">
+            <div class="wizard-section-title">Target Platforms</div>
+            <div class="wizard-section-sub">Which listing formats do you need? Select all that apply.</div>
+            <div class="chip-group mb-4" id="platformsGroup">
+                <label class="chip-label" onclick="toggleChip(this)">
+                    <input type="checkbox" value="ltr" />
+                    <i class="bi bi-house-door"></i><span>Long-Term Rental (LTR)</span>
+                </label>
+                <label class="chip-label" onclick="toggleChip(this)">
+                    <input type="checkbox" value="str" />
+                    <i class="bi bi-calendar-week"></i><span>Short-Term / Airbnb (STR)</span>
+                </label>
+                <label class="chip-label" onclick="toggleChip(this)">
+                    <input type="checkbox" value="social" />
+                    <i class="bi bi-instagram"></i><span>Social Media Caption</span>
+                </label>
+            </div>
+            <div style="background:var(--ds-navy-50);border:1px solid var(--ds-navy-100);border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
+                <i class="bi bi-stars" style="color:var(--ds-navy-600);font-size:18px;margin-top:1px;flex-shrink:0"></i>
+                <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--ds-navy-800);margin-bottom:2px">One generation covers all formats</div>
+                    <div style="font-size:12.5px;color:var(--ds-navy-700)">We generate all selected formats in a single AI call. You can also pick specific sections to regenerate later.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nav buttons -->
+        <div class="wizard-nav">
+            <button class="btn-ds-ghost d-none" id="btnBack" onclick="goPrev()">
+                <i class="bi bi-arrow-left"></i> Back
+            </button>
+            <div></div>
+            <button class="btn-ds-primary" id="btnNext" onclick="goNext()">
+                Next <i class="bi bi-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var currentStep = 1;
+var totalSteps = 4;
+
+function updateSteps(step) {
+    for (var i = 1; i <= totalSteps; i++) {
+        var num = $('#stepNum'+i);
+        var lbl = $('#stepLabel'+i);
+        num.removeClass('done active pending');
+        lbl.removeClass('active');
+        if (i < step)  { num.addClass('done').html('<i class="bi bi-check-lg"></i>'); $('#conn'+i).addClass('done'); }
+        if (i === step){ num.addClass('active').text(i); lbl.addClass('active'); }
+        if (i > step)  { num.addClass('pending').text(i); }
+    }
+    for (var j = 1; j < totalSteps; j++) {
+        $('#conn'+j).toggleClass('done', j < step);
+    }
+    for (var k = 1; k <= totalSteps; k++) {
+        $('#panel'+k).toggleClass('d-none', k !== step);
+    }
+    $('#btnBack').toggleClass('d-none', step === 1);
+    if (step === totalSteps) {
+        $('#btnNext').html('<i class="bi bi-check-lg"></i> @(isEdit ? "Save Changes" : "Save Property")');
+    } else {
+        $('#btnNext').html('Next <i class="bi bi-arrow-right"></i>');
+    }
+}
+
+function toggleChip(lbl) {
+    var cb = $(lbl).find('input[type=checkbox]');
+    cb.prop('checked', !cb.prop('checked'));
+    $(lbl).toggleClass('selected', cb.prop('checked'));
+}
+
+function validate(step) {
+    var ok = true;
+    if (step === 1) {
+        [['address','err-address'],['city','err-city'],['state','err-state'],['zip','err-zip']].forEach(function(f){
+            var val = $('#'+f[0]).val().trim();
+            var err = !val;
+            $('#'+f[0]).closest('.form-field').toggleClass('error', err);
+            $('#'+f[1]).toggleClass('d-none', !err);
+            if (err) ok = false;
+        });
+    }
+    if (step === 2) {
+        [['propertyType','err-type'],['bedrooms','err-beds'],['bathrooms','err-baths']].forEach(function(f){
+            var val = $('#'+f[0]).val();
+            var err = !val && val !== '0';
+            $('#'+f[0]).closest('.form-field').toggleClass('error', err);
+            $('#'+f[1]).toggleClass('d-none', !err);
+            if (err) ok = false;
+        });
+    }
+    return ok;
+}
+
+function goNext() {
+    if (!validate(currentStep)) return;
+    if (currentStep === totalSteps) { saveProperty(); return; }
+    currentStep++;
+    updateSteps(currentStep);
+}
+
+function goPrev() {
+    if (currentStep === 1) return;
+    currentStep--;
+    updateSteps(currentStep);
+}
+
+function getSelectedChips(groupId) {
+    return $('#'+groupId+' .chip-label input:checked').map(function(){ return $(this).val(); }).get();
+}
+
+function saveProperty() {
+    var $btn = $('#btnNext');
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving…');
+
+    var payload = {
+        address:      $('#address').val().trim(),
+        city:         $('#city').val().trim(),
+        state:        $('#state').val().trim().toUpperCase(),
+        zip:          $('#zip').val().trim(),
+        propertyType: $('#propertyType').val(),
+        status:       parseInt($('#status').val()),
+        bedrooms:     parseInt($('#bedrooms').val()) || 0,
+        bathrooms:    parseFloat($('#bathrooms').val()) || 0,
+        squareFootage:parseInt($('#sqft').val()) || null,
+        monthlyRent:  parseFloat($('#rent').val()) || null,
+        parking:      $('#parking').val().trim(),
+        petPolicy:    $('#petPolicy').val().trim(),
+        notes:        $('#notes').val().trim(),
+        amenitiesJson:JSON.stringify(getSelectedChips('amenitiesGroup')),
+        platformsJson:JSON.stringify(getSelectedChips('platformsGroup'))
+    };
+
+    var url    = '@(isEdit ? "/api/properties/" + propId : "/api/properties")';
+    var method = '@(isEdit ? "PUT" : "POST")';
+
+    $.ajax({
+        url: url, method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function(res) {
+            toastr.success('@(isEdit ? "Property updated!" : "Property saved!")');
+            window.location.href = '/Property/Detail/' + (res.id || @propId);
+        },
+        error: function(xhr) {
+            var msg = xhr.responseJSON?.message || 'Failed to save. Please try again.';
+            toastr.error(msg);
+            $btn.prop('disabled', false).html('<i class="bi bi-check-lg"></i> @(isEdit ? "Save Changes" : "Save Property")');
+        }
+    });
+}
+
+// Init
+updateSteps(1);
+
+@if (isEdit)
+{
+    <text>
+    // Load existing property data
+    $.ajax({
+        url: '/api/properties/@propId', method: 'GET',
+        success: function(p) {
+            $('#address').val(p.address);
+            $('#city').val(p.city);
+            $('#state').val(p.state);
+            $('#zip').val(p.zip);
+            $('#propertyType').val(p.propertyType);
+            $('#status').val(p.status);
+            $('#bedrooms').val(p.bedrooms);
+            $('#bathrooms').val(p.bathrooms);
+            $('#sqft').val(p.squareFootage);
+            $('#rent').val(p.monthlyRent);
+            $('#parking').val(p.parking);
+            $('#petPolicy').val(p.petPolicy);
+            $('#notes').val(p.notes);
+            try {
+                var amenities = JSON.parse(p.amenitiesJson || '[]');
+                $('#amenitiesGroup .chip-label input').each(function() {
+                    if (amenities.includes($(this).val())) {
+                        $(this).prop('checked', true);
+                        $(this).closest('.chip-label').addClass('selected');
+                    }
+                });
+                var platforms = JSON.parse(p.platformsJson || '[]');
+                $('#platformsGroup .chip-label input').each(function() {
+                    if (platforms.includes($(this).val())) {
+                        $(this).prop('checked', true);
+                        $(this).closest('.chip-label').addClass('selected');
+                    }
+                });
+            } catch(e) {}
+        }
+    });
+    </text>
+}
+</script>
+}
