@@ -305,7 +305,9 @@ function regenerateSection() {
             loadHistory();
         },
         error: function(xhr) {
-            toastr.error(xhr.responseJSON?.message || 'Regeneration failed.');
+            var msg = xhr.responseJSON?.message || 'Regeneration failed.';
+            if (xhr.status === 402) toastr.warning(msg);
+            else toastr.error(msg);
         },
         complete: function() {
             $btn.prop('disabled', false).html('<i class="bi bi-arrow-clockwise"></i>Regenerate Selected');
