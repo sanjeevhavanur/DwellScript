@@ -54,16 +54,17 @@ public class UsageService
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return (0, 0);
 
+        var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+
         if (user.Tier >= SubscriptionTier.Starter)
         {
             var used = await _db.Generations
                 .Where(g => g.UserId == userId && g.Type == GenerationType.Full
-                         && g.CreatedAt >= new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc))
+                         && g.CreatedAt >= startOfMonth)
                 .CountAsync();
             return (used, -1); // -1 = unlimited
         }
 
-        var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var freeUsed = await _db.Generations
             .Where(g => g.UserId == userId && g.Type == GenerationType.Full && g.CreatedAt >= startOfMonth)
             .CountAsync();
