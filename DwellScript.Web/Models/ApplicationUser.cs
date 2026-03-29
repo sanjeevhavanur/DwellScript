@@ -8,6 +8,7 @@ public class ApplicationUser : IdentityUser
     public string? StripeCustomerId { get; set; }
     public string? StripeSubscriptionId { get; set; }
     public SubscriptionTier Tier { get; set; } = SubscriptionTier.Free;
+    public DateTime? GracePeriodEndsAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<Property> Properties { get; set; } = new List<Property>();
 }

@@ -1,4 +1,5 @@
 using DwellScript.Web.Data;
+using DwellScript.Web.Filters;
 using DwellScript.Web.Models;
 using DwellScript.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -60,12 +61,15 @@ builder.Services.AddScoped<UsageService>();
 builder.Services.AddScoped<SubscriptionService>();
 builder.Services.AddScoped<VacancyAnalyzerService>();
 builder.Services.AddScoped<FairHousingFilter>();
+builder.Services.AddScoped<IResendEmailService, ResendEmailService>();
 
 // ── MVC + API (require auth by default) ───────────────────────────────────────
+builder.Services.AddScoped<UserContextFilter>();
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(
         new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()));
+    options.Filters.AddService<UserContextFilter>();
 });
 builder.Services.AddAntiforgery(options =>
 {
