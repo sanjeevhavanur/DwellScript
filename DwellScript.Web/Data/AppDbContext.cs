@@ -12,6 +12,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Generation> Generations => Set<Generation>();
     public DbSet<MagicLinkToken> MagicLinkTokens => Set<MagicLinkToken>();
     public DbSet<PromptTemplate> PromptTemplates => Set<PromptTemplate>();
+    public DbSet<VacancyAnalysis> VacancyAnalyses => Set<VacancyAnalysis>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -43,6 +44,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.HasOne(t => t.User)
              .WithMany()
              .HasForeignKey(t => t.UserId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<VacancyAnalysis>(e =>
+        {
+            e.HasOne(a => a.Property)
+             .WithMany()
+             .HasForeignKey(a => a.PropertyId)
              .OnDelete(DeleteBehavior.Cascade);
         });
     }

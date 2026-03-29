@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace DwellScript.Web.Controllers.Api;
 
@@ -49,7 +50,6 @@ public class AnalyzerApiController : ControllerBase
         if (prop == null)
             return NotFound(new { message = "Property not found." });
 
-        // Get latest generation for listing copy context
         var latestGen = await _db.Generations
             .Where(g => g.PropertyId == dto.PropertyId && g.UserId == user.Id)
             .OrderByDescending(g => g.CreatedAt)
@@ -59,12 +59,26 @@ public class AnalyzerApiController : ControllerBase
         {
             var result = await _analyzerService.AnalyzeAsync(prop, latestGen, dto.DaysOnMarket, dto.Context);
 
-            _logger.LogInformation("Vacancy analysis completed for property {PropertyId}, score: {Score}",
-                dto.PropertyId, result.Score);
+            // Persist the analysis
+            var analysis = new VacancyAnalysis
+            {
+                PropertyId    = dto.PropertyId,
+                UserId        = user.Id,
+                DaysOnMarket  = dto.DaysOnMarket,
+                Context       = dto.Context,
+                Score         = result.Score,
+                InsightsJson  = JsonSerializer.Serialize(result.Insights)
+            };
+            _db.VacancyAnalyses.Add(analysis);
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Vacancy analysis saved, Id: {Id}, score: {Score}", analysis.Id, result.Score);
 
             return Ok(new
             {
+                id       = analysis.Id,
                 score    = result.Score,
+                createdAt = analysis.CreatedAt,
                 insights = result.Insights.Select(i => new
                 {
                     title    = i.Title,
@@ -78,6 +92,79 @@ public class AnalyzerApiController : ControllerBase
             _logger.LogError(ex, "Vacancy analysis failed for property {PropertyId}", dto.PropertyId);
             return StatusCode(500, new { message = "Analysis failed. Please try again." });
         }
+    }
+
+    // GET /api/analyzer/history/{propertyId}
+    [HttpGet("history/{propertyId:int}")]
+    public async Task<IActionResult> History(int propertyId)
+    {
+        var userId = _userManager.GetUserId(User)!;
+
+        var prop = await _db.Properties
+            .FirstOrDefaultAsync(p => p.Id == propertyId && p.UserId == userId);
+        if (prop == null) return NotFound(new { message = "Property not found." });
+
+        var history = await _db.VacancyAnalyses
+            .Where(a => a.PropertyId == propertyId && a.UserId == userId)
+            .OrderByDescending(a => a.CreatedAt)
+            .Select(a => new
+            {
+                a.Id,
+                a.Score,
+                a.DaysOnMarket,
+                a.Context,
+                a.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(history);
+    }
+
+    // GET /api/analyzer/{id}
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetOne(int id)
+    {
+        var userId = _userManager.GetUserId(User)!;
+
+        var analysis = await _db.VacancyAnalyses
+            .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
+        if (analysis == null) return NotFound();
+
+        var insights = JsonSerializer.Deserialize<List<Services.AnalysisInsight>>(
+            analysis.InsightsJson,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? new();
+
+        return Ok(new
+        {
+            analysis.Id,
+            analysis.Score,
+            analysis.DaysOnMarket,
+            analysis.Context,
+            analysis.CreatedAt,
+            insights = insights.Select(i => new
+            {
+                title    = i.Title,
+                detail   = i.Detail,
+                severity = i.Severity
+            })
+        });
+    }
+
+    // DELETE /api/analyzer/{id}
+    [HttpDelete("{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var userId = _userManager.GetUserId(User)!;
+
+        var analysis = await _db.VacancyAnalyses
+            .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
+        if (analysis == null) return NotFound();
+
+        _db.VacancyAnalyses.Remove(analysis);
+        await _db.SaveChangesAsync();
+        return Ok(new { message = "Deleted." });
     }
 }
 

@@ -59,6 +59,19 @@
 .insight-item:last-child { border-bottom:none; }
 .insight-dot { width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0; }
 
+/* Analyzer layout */
+.analyze-layout { display:grid; grid-template-columns:1fr 340px; gap:16px; align-items:start; }
+@@media (max-width:960px) { .analyze-layout { grid-template-columns:1fr; } }
+
+/* Analysis history list */
+.analysis-hist-item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); cursor:pointer; transition:var(--transition-base); }
+.analysis-hist-item:last-child { border-bottom:none; }
+.analysis-hist-item:hover { opacity:.8; }
+.analysis-score-badge { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; border:3px solid; flex-shrink:0; }
+.analysis-score-badge.good { border-color:var(--ds-success); color:var(--ds-success); }
+.analysis-score-badge.warn { border-color:var(--ds-warning); color:var(--ds-warning); }
+.analysis-score-badge.bad  { border-color:var(--ds-error); color:var(--ds-error); }
+
 /* Loading overlay for generate */
 .gen-loading { display:none; text-align:center; padding:40px 20px; }
 .gen-loading-spinner { width:48px; height:48px; border:4px solid var(--border); border-top-color:var(--ds-navy-600); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px; }
@@ -153,7 +166,9 @@
 
 <!-- ── ANALYZE TAB ───────────────────────────────────── -->
 <div id="tabAnalyze" class="d-none">
-    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow-sm);max-width:680px">
+    <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow-sm);max-width:700px">
+
+        <!-- Header -->
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
             <div>
                 <div style="font-size:15px;font-weight:700;margin-bottom:4px"><i class="bi bi-graph-up-arrow me-2" style="color:var(--ds-navy-600)"></i>Vacancy Analyzer</div>
@@ -165,6 +180,18 @@
             </div>
         </div>
 
+        <!-- History — shown first so it's always visible -->
+        <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+            <div style="font-size:13.5px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+                <i class="bi bi-clock-history" style="color:var(--ds-navy-600)"></i>Analysis History
+                <span class="badge ms-1" id="analyzerHistBadge">0</span>
+            </div>
+            <div id="analyzerHistoryList">
+                <p style="font-size:13px;color:var(--text-tertiary);margin:0">No analyses yet. Run a new analysis below to get started.</p>
+            </div>
+        </div>
+
+        <!-- Lock state -->
         <div id="analyzerLocked" style="text-align:center;padding:32px 0">
             <div style="font-size:36px;margin-bottom:12px">🔒</div>
             <div style="font-size:14px;font-weight:700;margin-bottom:4px;color:var(--text-primary)">Pro Feature</div>
@@ -172,6 +199,7 @@
             <a href="/Billing" class="btn-ds-accent"><i class="bi bi-stars"></i>Upgrade to Pro</a>
         </div>
 
+        <!-- Form -->
         <div id="analyzerPanel" style="display:none">
             <div class="form-field mb-3">
                 <label class="ds-label">Days on market</label>
@@ -185,10 +213,10 @@
                 <i class="bi bi-graph-up"></i>Run Analyzer
             </button>
 
-            <div id="insightsList" style="margin-top:20px;display:none">
-                <div style="font-size:13.5px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">Insights</div>
-            </div>
+            <!-- Latest insights -->
+            <div id="insightsList" style="margin-top:20px;display:none"></div>
         </div>
+
     </div>
 </div>
 
@@ -230,7 +258,7 @@ $('.ds-tab').on('click', function(e) {
     $('#tabGenerate,#tabHistory,#tabAnalyze').addClass('d-none');
     if (tab==='generate') { $('#tabGenerate').removeClass('d-none'); loadLatestGen(); }
     if (tab==='history')  { $('#tabHistory').removeClass('d-none'); loadHistory(); }
-    if (tab==='analyze')  { $('#tabAnalyze').removeClass('d-none'); checkProAccess(); }
+    if (tab==='analyze')  { $('#tabAnalyze').removeClass('d-none'); checkProAccess(); loadAnalyzerHistory(); }
 });
 
 // Regen section selection
@@ -465,6 +493,7 @@ function runAnalyzer() {
         headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
         success: function(res) {
             renderAnalyzer(res);
+            loadAnalyzerHistory();
         },
         error: function(xhr) {
             toastr.error(xhr.responseJSON?.message || 'Analysis failed.');
@@ -492,6 +521,58 @@ function renderAnalyzer(res) {
     $('#insightsList').html('<div style="font-size:13.5px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">Insights</div>'+items).show();
 }
 
+// Analyzer history
+function loadAnalyzerHistory() {
+    $.ajax({
+        url: '/api/analyzer/history/'+propId, method:'GET',
+        success: function(items) {
+            $('#analyzerHistBadge').text(items.length);
+            if (!items.length) {
+                $('#analyzerHistoryList').html('<div class="ds-empty" style="padding:24px 0"><div class="ds-empty-icon" style="font-size:28px"><i class="bi bi-clock-history"></i></div><p style="font-size:13px;margin:0">No analyses yet.</p></div>');
+                return;
+            }
+            var html = items.map(function(a) {
+                var cls = a.score>=75?'good':a.score>=50?'warn':'bad';
+                var date = new Date(a.createdAt).toLocaleDateString(undefined, {month:'short',day:'numeric',year:'numeric'});
+                var sub = a.daysOnMarket+' days on market'+(a.context?'  \u2022 '+escHtml(a.context.substring(0,40))+(a.context.length>40?'\u2026':''):'');
+                return '<div class="analysis-hist-item" onclick="loadAnalysis('+a.id+')">'+
+                    '<div class="analysis-score-badge '+cls+'">'+a.score+'</div>'+
+                    '<div style="flex:1;min-width:0">'+
+                        '<div style="font-size:13px;font-weight:600;color:var(--text-primary)">'+date+'</div>'+
+                        '<div style="font-size:12px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+sub+'</div>'+
+                    '</div>'+
+                    '<button class="output-action-btn" style="color:var(--ds-error);flex-shrink:0" onclick="event.stopPropagation();deleteAnalysis('+a.id+')"><i class="bi bi-trash"></i></button>'+
+                '</div>';
+            }).join('');
+            $('#analyzerHistoryList').html(html);
+        },
+        error: function(xhr) {
+            console.error('Failed to load analysis history', xhr.status, xhr.responseText);
+        }
+    });
+}
+
+function loadAnalysis(id) {
+    $.ajax({
+        url: '/api/analyzer/'+id, method:'GET',
+        success: function(res) {
+            $('#daysOnMarket').val(res.daysOnMarket);
+            $('#analyzerContext').val(res.context||'');
+            renderAnalyzer(res);
+        }
+    });
+}
+
+function deleteAnalysis(id) {
+    if (!confirm('Delete this analysis?')) return;
+    $.ajax({
+        url: '/api/analyzer/'+id, method:'DELETE',
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function(){ toastr.success('Deleted.'); loadAnalyzerHistory(); },
+        error: function(){ toastr.error('Failed to delete.'); }
+    });
+}
+
 function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -504,5 +585,6 @@ function escAttr(s) {
 loadLatestGen();
 loadHistory();
 checkProAccess();
+loadAnalyzerHistory();
 </script>
 }
