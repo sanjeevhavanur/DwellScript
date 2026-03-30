@@ -64,7 +64,7 @@
         <button class="filter-btn active" data-filter="all">All</button>
         <button class="filter-btn" data-filter="active">Active</button>
         <button class="filter-btn" data-filter="vacant">Vacant</button>
-        <a href="/Property/Create" class="btn-ds-primary ms-2">
+        <a href="/Property/Create" class="btn-ds-primary ms-2" id="btnAddProperty">
             <i class="bi bi-plus-lg"></i>Add Property
         </a>
     </div>
@@ -85,6 +85,7 @@
 <div id="propContextMenu">
     <a id="ctxGenerate" href="#"><i class="bi bi-stars"></i> Generate Listing</a>
     <a id="ctxEdit" href="#"><i class="bi bi-pencil"></i> Edit</a>
+    <a id="ctxDuplicate" href="#"><i class="bi bi-copy"></i> Duplicate</a>
     <div class="ctx-divider"></div>
     <a id="ctxArchive" href="#" style="color:var(--ds-error)"><i class="bi bi-archive"></i> Archive</a>
 </div>
@@ -94,7 +95,17 @@
 var allProps = [];
 var activeFilter = 'all';
 var currentPropId = null;
+var propertyMax = null; // null = unlimited
 var typeIcons = { 'House':'🏠','Apartment':'🏢','Condo':'🏙️','Townhouse':'🏘️','Studio':'🛏️','Other':'🏗️' };
+
+// Load tier/limit info
+$.ajax({
+    url: '/api/billing/status', method: 'GET',
+    success: function(s) {
+        propertyMax = s.propertyMax || null;
+        updateAddButton();
+    }
+});
 
 function statusPill(s) {
     var m = {0:['Active','ds-pill-active'],1:['Vacant','ds-pill-vacant'],2:['Archived','ds-pill-archived']};
@@ -134,6 +145,26 @@ function renderCard(p) {
     '</a>';
 }
 
+function atLimit() {
+    return propertyMax !== null && allProps.length >= propertyMax;
+}
+
+function updateAddButton() {
+    if (atLimit()) {
+        $('#btnAddProperty').replaceWith(
+            '<span class="btn-ds-primary ms-2 disabled" style="opacity:.5;cursor:not-allowed" id="btnAddProperty">'+
+                '<i class="bi bi-plus-lg"></i>Add Property'+
+                '<span style="font-size:11px;margin-left:6px;opacity:.8">('+allProps.length+'/'+propertyMax+')</span>'+
+            '</span>'
+        );
+    } else {
+        var el = $('#btnAddProperty');
+        if (el.is('span')) {
+            el.replaceWith('<a href="/Property/Create" class="btn-ds-primary ms-2" id="btnAddProperty"><i class="bi bi-plus-lg"></i>Add Property</a>');
+        }
+    }
+}
+
 function renderGrid(props) {
     var q = $('#searchInput').val().toLowerCase();
     var filtered = props.filter(function(p){
@@ -144,13 +175,22 @@ function renderGrid(props) {
         return true;
     });
     var html = filtered.map(renderCard).join('');
-    html += '<a href="/Property/Create" class="prop-card-add">'+
-        '<div class="prop-add-icon"><i class="bi bi-plus-lg"></i></div>'+
-        '<span style="font-size:13.5px;font-weight:600;color:var(--text-secondary)">Add Property</span>'+
-        '<span style="font-size:12px;color:var(--text-tertiary)">Click to get started</span>'+
-    '</a>';
+    if (!atLimit()) {
+        html += '<a href="/Property/Create" class="prop-card-add">'+
+            '<div class="prop-add-icon"><i class="bi bi-plus-lg"></i></div>'+
+            '<span style="font-size:13.5px;font-weight:600;color:var(--text-secondary)">Add Property</span>'+
+            '<span style="font-size:12px;color:var(--text-tertiary)">Click to get started</span>'+
+        '</a>';
+    } else {
+        html += '<div class="prop-card-add" style="cursor:default;opacity:.6">'+
+            '<div class="prop-add-icon"><i class="bi bi-lock-fill"></i></div>'+
+            '<span style="font-size:13.5px;font-weight:600;color:var(--text-secondary)">Property limit reached</span>'+
+            '<a href="/Billing" style="font-size:12px;color:var(--ds-navy-600);font-weight:600">Upgrade to add more</a>'+
+        '</div>';
+    }
     $('#propsGrid').html(html);
     $('#propCount').text(filtered.length+' propert'+(filtered.length===1?'y':'ies'));
+    updateAddButton();
 }
 
 function loadProps() {
@@ -182,6 +222,18 @@ function openMenu(e, btn) {
     $('#ctxEdit').attr('href','/Property/Edit/'+currentPropId);
     $('#ctxGenerate').attr('href','/Property/Detail/'+currentPropId);
 }
+
+$('#ctxDuplicate').on('click', function(e){
+    e.preventDefault();
+    if (!currentPropId) return;
+    $.ajax({
+        url:'/api/properties/'+currentPropId+'/duplicate', method:'POST',
+        headers:{'RequestVerificationToken':$('input[name="__RequestVerificationToken"]').val()},
+        success:function(res){ toastr.success('Property duplicated.'); loadProps(); },
+        error:function(xhr){ toastr.error(xhr.responseJSON?.message || 'Failed to duplicate.'); }
+    });
+    $('#propContextMenu').hide();
+});
 
 $('#ctxArchive').on('click', function(e){
     e.preventDefault();

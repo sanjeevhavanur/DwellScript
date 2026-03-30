@@ -141,6 +141,15 @@
         <div style="font-size:13px;color:var(--text-tertiary)">This takes about 10–15 seconds</div>
     </div>
 
+    <!-- Fair Housing warning -->
+    <div id="fairHousingAlert" style="display:none;background:var(--ds-warning-bg,#fefce8);border:1.5px solid var(--ds-warning);border-radius:var(--radius-lg);padding:12px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:10px">
+        <i class="bi bi-exclamation-triangle-fill" style="color:var(--ds-warning);font-size:16px;margin-top:1px;flex-shrink:0"></i>
+        <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:2px">Fair Housing Review Recommended</div>
+            <div id="fairHousingMsg" style="font-size:12.5px;color:var(--text-secondary)">The generated copy may contain language that requires review for Fair Housing compliance. Please review before publishing.</div>
+        </div>
+    </div>
+
     <!-- Output grid -->
     <div id="outputGrid" class="output-grid">
         <!-- Empty state -->
@@ -296,6 +305,7 @@ function generateFull() {
         success: function(gen) {
             currentGen = gen;
             renderOutputs(gen);
+            showFairHousingAlert(gen);
             loadHistory();
         },
         error: function(xhr) {
@@ -330,6 +340,7 @@ function regenerateSection() {
         success: function(gen) {
             currentGen = gen;
             renderOutputs(gen);
+            showFairHousingAlert(gen);
             loadHistory();
         },
         error: function(xhr) {
@@ -342,6 +353,16 @@ function regenerateSection() {
             $('#genLoading').hide();
         }
     });
+}
+
+function showFairHousingAlert(gen) {
+    if (gen && gen.fairHousingViolations && gen.fairHousingViolations.length) {
+        var violations = gen.fairHousingViolations.join(', ');
+        $('#fairHousingMsg').text('Potential Fair Housing issue detected: ' + violations + '. Please review before publishing.');
+        $('#fairHousingAlert').show();
+    } else {
+        $('#fairHousingAlert').hide();
+    }
 }
 
 // Load latest generation

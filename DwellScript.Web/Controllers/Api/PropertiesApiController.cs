@@ -53,6 +53,20 @@ public class PropertiesApiController : ControllerBase
     public async Task<IActionResult> Create([FromBody] PropertyUpsertDto dto)
     {
         var userId = _userManager.GetUserId(User)!;
+        var user   = await _userManager.GetUserAsync(User);
+        if (user != null)
+        {
+            int limit = user.Tier == SubscriptionTier.Free    ? 1
+                      : user.Tier == SubscriptionTier.Starter ? 10
+                      : int.MaxValue;
+            int count = await _db.Properties.CountAsync(p => p.UserId == userId && !p.IsArchived);
+            if (count >= limit)
+            {
+                var label = limit == 1 ? "1 property" : $"{limit} properties";
+                return StatusCode(402, new { message = $"Your {user.Tier} plan allows up to {label}. Upgrade to add more." });
+            }
+        }
+
         var prop = new Property
         {
             UserId       = userId,
@@ -118,6 +132,52 @@ public class PropertiesApiController : ControllerBase
         prop.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         return Ok();
+    }
+
+    [HttpPost("{id:int}/duplicate")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Duplicate(int id)
+    {
+        var userId = _userManager.GetUserId(User)!;
+        var user   = await _userManager.GetUserAsync(User);
+        var source = await _db.Properties.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+        if (source == null) return NotFound();
+
+        if (user != null)
+        {
+            int limit = user.Tier == SubscriptionTier.Free    ? 1
+                      : user.Tier == SubscriptionTier.Starter ? 10
+                      : int.MaxValue;
+            int count = await _db.Properties.CountAsync(p => p.UserId == userId && !p.IsArchived);
+            if (count >= limit)
+            {
+                var label = limit == 1 ? "1 property" : $"{limit} properties";
+                return StatusCode(402, new { message = $"Your {user.Tier} plan allows up to {label}. Upgrade to duplicate." });
+            }
+        }
+
+        var copy = new Property
+        {
+            UserId        = userId,
+            Address       = source.Address + " (Copy)",
+            City          = source.City,
+            State         = source.State,
+            Zip           = source.Zip,
+            PropertyType  = source.PropertyType,
+            Status        = PropertyStatus.Active,
+            Bedrooms      = source.Bedrooms,
+            Bathrooms     = source.Bathrooms,
+            SquareFootage = source.SquareFootage,
+            MonthlyRent   = source.MonthlyRent,
+            PetPolicy     = source.PetPolicy,
+            Parking       = source.Parking,
+            Notes         = source.Notes,
+            AmenitiesJson = source.AmenitiesJson,
+            PlatformsJson = source.PlatformsJson
+        };
+        _db.Properties.Add(copy);
+        await _db.SaveChangesAsync();
+        return Ok(new { copy.Id });
     }
 }
 
