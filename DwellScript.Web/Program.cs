@@ -3,6 +3,7 @@ using DwellScript.Web.Filters;
 using DwellScript.Web.Models;
 using DwellScript.Web.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Resend;
@@ -84,6 +85,12 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
+
+// ── Forwarded headers (Railway / reverse proxy HTTPS) ────────────────────────
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 // ── Middleware Pipeline ───────────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
