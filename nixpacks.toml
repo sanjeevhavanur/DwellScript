@@ -1,0 +1,5 @@
+[phases.build]
+cmds = ["dotnet publish DwellScript.Web/DwellScript.Web.csproj -c Release -o /app/out"]
+
+[start]
+cmd = "dotnet /app/out/DwellScript.Web.dll"
