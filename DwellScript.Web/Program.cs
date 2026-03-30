@@ -11,8 +11,19 @@ using Resend;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Database ──────────────────────────────────────────────────────────────────
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    // Railway injects individual PG* vars from the linked Postgres service
+    var host     = Environment.GetEnvironmentVariable("PGHOST");
+    var port     = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+    var db       = Environment.GetEnvironmentVariable("PGDATABASE");
+    var user     = Environment.GetEnvironmentVariable("PGUSER");
+    var password = Environment.GetEnvironmentVariable("PGPASSWORD");
+    connectionString = $"Host={host};Port={port};Database={db};Username={user};Password={password}";
+}
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // ── Identity ──────────────────────────────────────────────────────────────────
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
