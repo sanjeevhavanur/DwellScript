@@ -533,13 +533,48 @@ function renderAnalyzer(res) {
 
     var items = (res.insights||[]).map(function(ins) {
         var color = ins.severity==='high'?'var(--ds-error)':ins.severity==='medium'?'var(--ds-warning)':'var(--ds-success)';
-        return '<div class="insight-item">'+
-            '<div class="insight-dot" style="background:'+color+'"></div>'+
-            '<div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:var(--text-primary);margin-bottom:2px">'+escHtml(ins.title)+'</div>'+
-            '<div style="font-size:13px;color:var(--text-secondary)">'+escHtml(ins.detail)+'</div></div>'+
+        var applyBtn = (ins.suggestedFix && ins.section)
+            ? '<div style="padding-left:22px;margin-top:6px">'+
+              '<button class="output-action-btn apply-fix-btn" style="padding:4px 10px;font-size:12px;border:1px solid var(--ds-accent);border-radius:6px;color:var(--ds-accent);background:transparent;cursor:pointer" '+
+              'onclick="applyInsightFix('+JSON.stringify(ins.section)+','+JSON.stringify(ins.suggestedFix)+')" title="Rewrite '+escHtml(ins.section)+' copy with this fix">'+
+              '<i class="bi bi-magic"></i> Apply Fix</button>'+
+              '</div>'
+            : '';
+        return '<div class="insight-item" style="flex-direction:column;align-items:flex-start">'+
+            '<div style="display:flex;gap:10px;align-items:flex-start;width:100%">'+
+                '<div class="insight-dot" style="background:'+color+';margin-top:4px;flex-shrink:0"></div>'+
+                '<div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:var(--text-primary);margin-bottom:2px">'+escHtml(ins.title)+'</div>'+
+                '<div style="font-size:13px;color:var(--text-secondary)">'+escHtml(ins.detail)+'</div></div>'+
+            '</div>'+
+            applyBtn+
         '</div>';
     }).join('');
     $('#insightsList').html('<div style="font-size:13.5px;font-weight:700;margin-bottom:12px;color:var(--text-primary)">Insights</div>'+items).show();
+}
+
+function applyInsightFix(section, instruction) {
+    var $btn = $(event.currentTarget);
+    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Applying…');
+
+    $.ajax({
+        url: '/api/generation/regen-section',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ propertyId: propId, section: section, instruction: instruction }),
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function(gen) {
+            currentGen = gen;
+            renderOutputs(gen);
+            showFairHousingAlert(gen);
+            loadHistory();
+            toastr.success('Section rewritten! Switching to Generate tab…');
+            $('#tabGenerate').tab('show');
+        },
+        error: function(xhr) {
+            toastr.error(xhr.responseJSON?.message || 'Failed to apply fix.');
+            $btn.prop('disabled', false).html('<i class="bi bi-magic"></i> Apply Fix');
+        }
+    });
 }
 
 // Analyzer history

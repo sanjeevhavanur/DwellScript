@@ -154,7 +154,7 @@ public class GenerationService
 
         var parameters = new MessageParameters
         {
-            Model = "claude-sonnet-4-5",
+            Model = "claude-sonnet-4-6",
             MaxTokens = 4096,
             Messages = messages,
             SystemMessage = string.IsNullOrWhiteSpace(systemPrompt) ? null : systemPrompt

@@ -19,6 +19,12 @@ public class AnalysisInsight
 
     [JsonPropertyName("severity")]
     public string Severity { get; set; } = "medium"; // high | medium | low
+
+    [JsonPropertyName("suggestedFix")]
+    public string? SuggestedFix { get; set; }
+
+    [JsonPropertyName("section")]
+    public string? Section { get; set; } // ltr | str | social | headlines
 }
 
 public class AnalysisResult
@@ -97,7 +103,7 @@ public class VacancyAnalyzerService
 
         var parameters = new MessageParameters
         {
-            Model         = "claude-sonnet-4-5",
+            Model         = "claude-sonnet-4-6",
             MaxTokens     = 2048,
             Messages      = messages,
             SystemMessage = string.IsNullOrWhiteSpace(systemPrompt) ? null : systemPrompt
