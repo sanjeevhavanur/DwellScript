@@ -109,12 +109,31 @@ public class VacancyAnalyzerService
             SystemMessage = string.IsNullOrWhiteSpace(systemPrompt) ? null : systemPrompt
         };
 
-        _logger.LogInformation("Calling Claude for vacancy analysis, prompt length: {Length}", prompt.Length);
-        var response = await client.Messages.GetClaudeMessageAsync(parameters);
-        var text = response.Content.OfType<TextContent>().FirstOrDefault()?.Text ?? "";
-        _logger.LogInformation("Vacancy analysis response received, length: {Length}", text.Length);
+        const int maxAttempts = 3;
+        int[] delaysMs = [2000, 5000, 10000];
 
-        return text;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                _logger.LogInformation("Calling Claude for vacancy analysis (attempt {Attempt}), prompt length: {Length}", attempt, prompt.Length);
+                var response = await client.Messages.GetClaudeMessageAsync(parameters);
+                var text = response.Content.OfType<TextContent>().FirstOrDefault()?.Text ?? "";
+                _logger.LogInformation("Vacancy analysis response received, length: {Length}", text.Length);
+                return text;
+            }
+            catch (HttpRequestException ex) when (ex.Message.Contains("overloaded_error") && attempt < maxAttempts)
+            {
+                _logger.LogWarning("Claude API overloaded on attempt {Attempt}, retrying in {Delay}ms", attempt, delaysMs[attempt - 1]);
+                await Task.Delay(delaysMs[attempt - 1]);
+            }
+        }
+
+        _logger.LogInformation("Calling Claude for vacancy analysis (final attempt), prompt length: {Length}", prompt.Length);
+        var finalResponse = await client.Messages.GetClaudeMessageAsync(parameters);
+        var finalText = finalResponse.Content.OfType<TextContent>().FirstOrDefault()?.Text ?? "";
+        _logger.LogInformation("Vacancy analysis response received, length: {Length}", finalText.Length);
+        return finalText;
     }
 
     private AnalysisResult ParseResponse(string rawResponse)

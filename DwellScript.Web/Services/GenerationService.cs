@@ -224,12 +224,32 @@ public class GenerationService
             SystemMessage = string.IsNullOrWhiteSpace(systemPrompt) ? null : systemPrompt
         };
 
-        _logger.LogInformation("Calling Claude API, prompt length: {Length}", prompt.Length);
-        var response = await client.Messages.GetClaudeMessageAsync(parameters);
-        var text = response.Content.OfType<TextContent>().FirstOrDefault()?.Text ?? "";
-        _logger.LogInformation("Claude API response received, length: {Length}", text.Length);
+        const int maxAttempts = 3;
+        int[] delaysMs = [2000, 5000, 10000]; // 2s, 5s, 10s
 
-        return text;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                _logger.LogInformation("Calling Claude API (attempt {Attempt}), prompt length: {Length}", attempt, prompt.Length);
+                var response = await client.Messages.GetClaudeMessageAsync(parameters);
+                var text = response.Content.OfType<TextContent>().FirstOrDefault()?.Text ?? "";
+                _logger.LogInformation("Claude API response received, length: {Length}", text.Length);
+                return text;
+            }
+            catch (HttpRequestException ex) when (ex.Message.Contains("overloaded_error") && attempt < maxAttempts)
+            {
+                _logger.LogWarning("Claude API overloaded on attempt {Attempt}, retrying in {Delay}ms", attempt, delaysMs[attempt - 1]);
+                await Task.Delay(delaysMs[attempt - 1]);
+            }
+        }
+
+        // Final attempt outside the loop — let any exception bubble up naturally
+        _logger.LogInformation("Calling Claude API (final attempt), prompt length: {Length}", prompt.Length);
+        var finalResponse = await client.Messages.GetClaudeMessageAsync(parameters);
+        var finalText = finalResponse.Content.OfType<TextContent>().FirstOrDefault()?.Text ?? "";
+        _logger.LogInformation("Claude API response received, length: {Length}", finalText.Length);
+        return finalText;
     }
 
     private GenerationResult ParseFullResponse(string rawResponse)
