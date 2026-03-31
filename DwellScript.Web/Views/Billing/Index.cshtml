@@ -16,8 +16,8 @@
 .plan-badge.popular-badge { background:var(--ds-warm-100); color:var(--ds-warm-700); }
 
 .plan-name { font-size:18px; font-weight:800; color:var(--text-primary); margin-bottom:4px; }
-.plan-price { font-size:32px; font-weight:800; color:var(--text-primary); line-height:1; margin-bottom:4px; }
-.plan-price sup { font-size:16px; font-weight:600; vertical-align:top; margin-top:6px; margin-right:2px; }
+.plan-price { font-size:32px; font-weight:800; color:var(--text-primary); line-height:1; margin-bottom:4px; display:flex; align-items:baseline; gap:2px; }
+.plan-price sup { font-size:16px; font-weight:600; line-height:1; }
 .plan-price-sub { font-size:13px; color:var(--text-tertiary); margin-bottom:20px; }
 .plan-period-toggle { display:flex; align-items:center; gap:8px; margin-bottom:20px; font-size:13px; color:var(--text-secondary); }
 .plan-period-toggle input[type=checkbox] { width:36px; height:20px; appearance:none; background:var(--border-strong); border-radius:var(--radius-full); cursor:pointer; position:relative; transition:var(--transition-base); }
@@ -81,6 +81,7 @@
             <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Section refinement</li>
             <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Generation history</li>
             <li class="plan-feature no"><i class="bi bi-x-circle"></i>Vacancy Analyzer</li>
+            <li class="plan-feature no"><i class="bi bi-x-circle"></i>Persona Targeting</li>
             <li class="plan-feature no"><i class="bi bi-x-circle"></i>Unlimited properties</li>
         </ul>
         <button class="btn-ds-accent w-100" id="btnStarter" onclick="checkout('starter')">
@@ -101,6 +102,7 @@
             <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Section refinement</li>
             <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Generation history</li>
             <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i><strong>Vacancy Analyzer</strong></li>
+            <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i><strong>Persona Targeting</strong></li>
             <li class="plan-feature has"><i class="bi bi-check-circle-fill"></i>Priority support</li>
         </ul>
         <button class="btn-ds-primary w-100" id="btnPro" onclick="checkout('pro')">
