@@ -49,18 +49,41 @@
         </nav>
 
         <div class="ds-sidebar-bottom">
-            <div class="ds-quota-block">
-                <div class="ds-quota-label">
-                    <span>Generations</span>
-                    <span>@quotaUsed / @quotaMax</span>
-                </div>
-                <div class="ds-quota-bar">
-                    <div class="ds-quota-fill @(quotaWarning ? "warning" : "")" style="width:@quotaPct%"></div>
-                </div>
-            </div>
-
-            @if (tier == "Free" || tier == "Starter")
+            @if (tier == "Pro")
             {
+                <div class="ds-quota-block">
+                    <div class="ds-quota-label">
+                        <span>Generations</span>
+                        <span style="color:var(--ds-warm-400);font-weight:700">Unlimited</span>
+                    </div>
+                </div>
+            }
+            else if (tier == "Starter")
+            {
+                <div class="ds-quota-block">
+                    <div class="ds-quota-label">
+                        <span>Generations</span>
+                        <span>@quotaUsed / @quotaMax</span>
+                    </div>
+                    <div class="ds-quota-bar">
+                        <div class="ds-quota-fill @(quotaWarning ? "warning" : "")" style="width:@quotaPct%"></div>
+                    </div>
+                </div>
+                <a href="/Billing" class="ds-upgrade-btn">
+                    <i class="bi bi-stars"></i>Upgrade to Pro
+                </a>
+            }
+            else
+            {
+                <div class="ds-quota-block">
+                    <div class="ds-quota-label">
+                        <span>Generations</span>
+                        <span>@quotaUsed / @quotaMax</span>
+                    </div>
+                    <div class="ds-quota-bar">
+                        <div class="ds-quota-fill @(quotaWarning ? "warning" : "")" style="width:@quotaPct%"></div>
+                    </div>
+                </div>
                 <a href="/Billing" class="ds-upgrade-btn">
                     <i class="bi bi-stars"></i>Upgrade to Pro
                 </a>

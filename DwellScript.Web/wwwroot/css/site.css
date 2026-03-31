@@ -471,7 +471,7 @@ body {
 .ds-pill-active  { background: var(--ds-success-bg); color: var(--ds-success); }
 .ds-pill-vacant  { background: var(--ds-warning-bg); color: var(--ds-warning); }
 .ds-pill-archived{ background: var(--ds-neutral-100); color: var(--ds-neutral-500); }
-.ds-pill-pro     { background: var(--ds-navy-100); color: var(--ds-navy-700); }
+.ds-pill-pro     { background: var(--ds-warm-100); color: var(--ds-warm-700); }
 .ds-pill-starter { background: var(--ds-warm-100); color: var(--ds-warm-700); }
 .ds-pill-free    { background: var(--ds-neutral-100); color: var(--ds-neutral-600); }
 
