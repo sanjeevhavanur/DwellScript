@@ -234,6 +234,17 @@
 <div id="tabPersona" class="d-none">
     <div class="persona-wrapper">
 
+        <!-- History panel -->
+        <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+            <div style="font-size:13.5px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+                <i class="bi bi-clock-history" style="color:var(--ds-navy-600)"></i>Persona History
+                <span class="badge ms-1" id="personaHistBadge">0</span>
+            </div>
+            <div id="personaHistoryList">
+                <p style="font-size:13px;color:var(--text-tertiary);margin:0">No persona listings yet. Generate one below to get started.</p>
+            </div>
+        </div>
+
         <!-- Section A: Persona Selector -->
         <div class="persona-header">
             <div>
@@ -366,7 +377,7 @@ $('.ds-tab').on('click', function(e) {
     if (tab==='generate') { $('#tabGenerate').removeClass('d-none'); loadLatestGen(); }
     if (tab==='history')  { $('#tabHistory').removeClass('d-none'); loadHistory(); }
     if (tab==='analyze')  { $('#tabAnalyze').removeClass('d-none'); checkProAccess(); loadAnalyzerHistory(); }
-    if (tab==='persona')  { $('#tabPersona').removeClass('d-none'); }
+    if (tab==='persona')  { $('#tabPersona').removeClass('d-none'); loadPersonaHistory(); }
 });
 
 // Regen section selection

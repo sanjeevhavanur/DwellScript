@@ -91,6 +91,7 @@ function generatePersonaListing() {
             personaGenerated = true;
             renderPersonaOutput(res.output);
             $('#personaFhaStrip').show();
+            loadPersonaHistory();
             toastr.success('Persona listing generated!', '', { timeOut: 3500 });
         },
         error: function(xhr) {
@@ -139,6 +140,7 @@ function regenPersona() {
         success: function(res) {
             personaOutput = res.output;
             renderPersonaOutput(res.output);
+            loadPersonaHistory();
             toastr.success('Persona listing regenerated.');
         },
         error: function(xhr) {
@@ -175,6 +177,7 @@ function submitPersonaRefine() {
         success: function(res) {
             personaOutput = res.output;
             renderPersonaOutput(res.output);
+            loadPersonaHistory();
             var preview = instruction.length > 40 ? instruction.substring(0, 40) + '\u2026' : instruction;
             toastr.success('\u201c' + preview + '\u201d applied.', 'Refinement Applied');
         },
@@ -203,6 +206,93 @@ function downloadPersonaOutput() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+}
+
+// ── Persona History ──────────────────────────────────────────────────
+
+function loadPersonaHistory() {
+    if (typeof propId === 'undefined') return;
+    $.ajax({
+        url: '/api/generation/persona-history/' + propId,
+        method: 'GET',
+        success: function(items) {
+            $('#personaHistBadge').text(items.length);
+            if (!items || items.length === 0) {
+                $('#personaHistoryList').html(
+                    '<p style="font-size:13px;color:var(--text-tertiary);margin:0">No persona listings yet. Generate one below to get started.</p>'
+                );
+                return;
+            }
+            var html = items.map(function(item) {
+                var p = PERSONAS.find(function(x) { return x.key === item.personaKey; });
+                var personaName = p ? p.name : (item.personaKey || 'Unknown');
+                var iconClass = p ? p.icon : 'bi-person';
+                var iconColor = p ? p.iconColor : '#6B7280';
+                var typeLabel = item.type === 'PersonaRefine' ? ' &middot; Refined' : '';
+                var date = new Date(item.createdAt);
+                var dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+                              ' ' + date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                return '<div class="persona-hist-item" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);margin-bottom:6px;background:var(--card-bg)">' +
+                    '<i class="bi ' + iconClass + '" style="color:' + iconColor + ';font-size:15px;flex-shrink:0"></i>' +
+                    '<div style="flex:1;min-width:0">' +
+                        '<div style="font-size:13px;font-weight:600;color:var(--text-primary)">' + personaName + typeLabel + '</div>' +
+                        '<div style="font-size:11.5px;color:var(--text-tertiary)">' + dateStr + ' &middot; ' + item.wordCount + ' words</div>' +
+                    '</div>' +
+                    '<button class="ds-icon-btn" title="Load" onclick="loadPersonaOne(' + item.id + ')" style="flex-shrink:0"><i class="bi bi-arrow-up-right-square"></i></button>' +
+                    '<button class="ds-icon-btn" title="Delete" onclick="deletePersonaHistory(' + item.id + ',event)" style="flex-shrink:0;color:var(--danger,#dc2626)"><i class="bi bi-trash3"></i></button>' +
+                '</div>';
+            }).join('');
+            $('#personaHistoryList').html(html);
+        },
+        error: function() {
+            // silently fail — history is non-critical
+        }
+    });
+}
+
+function loadPersonaOne(id) {
+    $.ajax({
+        url: '/api/generation/persona/' + id,
+        method: 'GET',
+        success: function(res) {
+            var p = PERSONAS.find(function(x) { return x.key === res.personaKey; });
+            if (p) {
+                selectedPersona = p;
+                $('.persona-card').removeClass('selected');
+                $('#pcard-' + p.key).addClass('selected');
+                var icon = '<i class="bi ' + p.icon + '" style="color:' + p.iconColor + ';margin-right:6px"></i>';
+                $('#personaStatus')
+                    .html(icon + 'Showing: <strong>' + p.name + '</strong>')
+                    .addClass('has-persona');
+                $('#btnPersonaGenerate').prop('disabled', false);
+            }
+            personaOutput = res.output;
+            personaGenerated = true;
+            renderPersonaOutput(res.output);
+            $('#personaFhaStrip').show();
+            toastr.info('Loaded persona listing from history.');
+        },
+        error: function() {
+            toastr.error('Could not load persona listing.');
+        }
+    });
+}
+
+function deletePersonaHistory(id, e) {
+    e.stopPropagation();
+    if (!confirm('Delete this persona listing from history?')) return;
+    $.ajax({
+        url: '/api/generation/persona/' + id,
+        method: 'DELETE',
+        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+        success: function() {
+            toastr.success('Persona listing deleted.');
+            loadPersonaHistory();
+        },
+        error: function() {
+            toastr.error('Could not delete persona listing.');
+        }
+    });
 }
 
 // Enter key in refine input

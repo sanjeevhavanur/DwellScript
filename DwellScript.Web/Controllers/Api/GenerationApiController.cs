@@ -281,6 +281,74 @@ public class GenerationApiController : ControllerBase
         }
     }
 
+    // GET /api/generation/persona-history/{propertyId}
+    [HttpGet("persona-history/{propertyId:int}")]
+    public async Task<IActionResult> PersonaHistory(int propertyId)
+    {
+        var userId = _userManager.GetUserId(User)!;
+
+        var prop = await _db.Properties
+            .FirstOrDefaultAsync(p => p.Id == propertyId && p.UserId == userId);
+        if (prop == null) return NotFound(new { message = "Property not found." });
+
+        var history = await _db.Generations
+            .Where(g => g.PropertyId == propertyId && g.UserId == userId &&
+                        (g.Type == GenerationType.PersonaGeneration || g.Type == GenerationType.PersonaRefine))
+            .OrderByDescending(g => g.CreatedAt)
+            .Select(g => new
+            {
+                g.Id,
+                g.PersonaKey,
+                g.Type,
+                g.RefinementInstruction,
+                g.CreatedAt,
+                wordCount = g.LtrOutput == null ? 0 : g.LtrOutput.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length
+            })
+            .ToListAsync();
+
+        return Ok(history);
+    }
+
+    // GET /api/generation/persona/{id}
+    [HttpGet("persona/{id:int}")]
+    public async Task<IActionResult> GetPersonaOne(int id)
+    {
+        var userId = _userManager.GetUserId(User)!;
+
+        var gen = await _db.Generations
+            .FirstOrDefaultAsync(g => g.Id == id && g.UserId == userId &&
+                                      (g.Type == GenerationType.PersonaGeneration || g.Type == GenerationType.PersonaRefine));
+        if (gen == null) return NotFound();
+
+        return Ok(new
+        {
+            gen.Id,
+            gen.PersonaKey,
+            gen.Type,
+            gen.RefinementInstruction,
+            gen.CreatedAt,
+            output = gen.LtrOutput ?? "",
+            wordCount = gen.LtrOutput?.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length ?? 0
+        });
+    }
+
+    // DELETE /api/generation/persona/{id}
+    [HttpDelete("persona/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeletePersona(int id)
+    {
+        var userId = _userManager.GetUserId(User)!;
+
+        var gen = await _db.Generations
+            .FirstOrDefaultAsync(g => g.Id == id && g.UserId == userId &&
+                                      (g.Type == GenerationType.PersonaGeneration || g.Type == GenerationType.PersonaRefine));
+        if (gen == null) return NotFound();
+
+        _db.Generations.Remove(gen);
+        await _db.SaveChangesAsync();
+        return Ok(new { message = "Deleted." });
+    }
+
     // GET /api/generation/latest/{propertyId}
     [HttpGet("latest/{propertyId:int}")]
     public async Task<IActionResult> GetLatest(int propertyId)
