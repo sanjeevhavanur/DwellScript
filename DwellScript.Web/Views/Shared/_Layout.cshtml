@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/persona.css" asp-append-version="true" />
     <link rel="icon" type="image/png" href="~/logo/DwellScriptLogo.png" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -27,7 +28,7 @@
     var quotaWarning = quotaPct >= 66;
 }
 
-<div class="ds-shell">
+<div class="ds-shell" data-user-tier="@tier">
 
     <!-- ── Sidebar ────────────────────────────────── -->
     <aside class="ds-sidebar">
@@ -147,6 +148,7 @@
                $('meta[name="csrf-token"]').attr('content') || '';
     }
 </script>
+<script src="~/js/persona.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

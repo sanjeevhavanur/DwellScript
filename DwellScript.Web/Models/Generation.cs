@@ -14,8 +14,9 @@ public class Generation
     public string? SocialOutput { get; set; }
     public string? HeadlinesJson { get; set; }        // JSON array of 3 strings
     public bool IsFlaggedForAnalyzer { get; set; } = false;
+    public string? PersonaKey { get; set; }           // e.g. "remote-worker", "pet-owner"
     public decimal UsageUnitsConsumed { get; set; }   // 1.0 full, 0.25 section regen
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
-public enum GenerationType { Full, SectionRegen, AnalyzerApplied }
+public enum GenerationType { Full, SectionRegen, AnalyzerApplied, PersonaGeneration, PersonaRefine }

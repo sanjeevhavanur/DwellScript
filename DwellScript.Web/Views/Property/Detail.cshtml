@@ -96,7 +96,8 @@
 <div class="ds-page-tabs">
     <a class="ds-tab active" href="#" data-tab="generate"><i class="bi bi-stars"></i>Generate</a>
     <a class="ds-tab" href="#" data-tab="history"><i class="bi bi-clock-history"></i>History <span class="badge" id="histBadge">0</span></a>
-    <a class="ds-tab" href="#" data-tab="analyze"><i class="bi bi-graph-up"></i>Vacancy Analyzer</a>
+    <a class="ds-tab" href="#" data-tab="persona"><i class="bi bi-people-fill"></i>Persona <span class="ptab-pro-badge">Pro</span></a>
+    <a class="ds-tab" href="#" data-tab="analyze"><i class="bi bi-graph-up"></i>Vacancy Analyzer <span class="ptab-pro-badge">Pro</span></a>
 </div>
 }
 
@@ -229,6 +230,98 @@
     </div>
 </div>
 
+<!-- ── PERSONA TAB ──────────────────────────────────── -->
+<div id="tabPersona" class="d-none">
+    <div class="persona-wrapper">
+
+        <!-- Section A: Persona Selector -->
+        <div class="persona-header">
+            <div>
+                <div class="persona-title">Lifestyle Emphasis</div>
+                <div class="persona-subtitle">Select a lifestyle focus. The AI will emphasize relevant property features in your LTR listing copy.</div>
+            </div>
+            <div class="fha-pill">
+                <i class="bi bi-shield-check-fill"></i>Fair Housing compliant
+            </div>
+        </div>
+
+        <div class="persona-grid" id="personaGrid"></div>
+
+        <!-- Generate button row -->
+        <div class="persona-generate-row">
+            <div class="persona-status-text" id="personaStatus"><em>← Select a lifestyle focus above</em></div>
+            <div>
+                <button class="persona-generate-btn" id="btnPersonaGenerate" onclick="generatePersonaListing()" disabled>
+                    <i class="bi bi-stars"></i>Generate Persona Listing
+                </button>
+                <div class="persona-usage-note"><i class="bi bi-info-circle"></i> Counts as 1 generation unit</div>
+            </div>
+        </div>
+
+        <!-- Section B: Output area -->
+        <div id="personaPreGen" class="persona-placeholder">
+            <i class="bi bi-person-lines-fill"></i>
+            <p style="margin:0">Select a persona above and click Generate</p>
+        </div>
+
+        <div id="personaSkeleton" class="persona-placeholder" style="display:none">
+            <div style="width:100%;padding:0 16px">
+                <div class="sk-line" style="width:90%"></div>
+                <div class="sk-line" style="width:80%;margin-top:12px"></div>
+                <div class="sk-line" style="width:70%;margin-top:12px"></div>
+            </div>
+        </div>
+
+        <div id="personaOutputCard" class="output-card" style="display:none">
+            <div class="output-card-header">
+                <div class="output-card-title">
+                    <div class="persona-icon-box" id="personaCardIcon" style="width:36px;height:36px;font-size:17px"></div>
+                    <div>
+                        <div style="font-size:14px;font-weight:600">Persona Listing</div>
+                        <div id="personaCardSubtitle" style="font-size:11px;color:var(--text-tertiary)"></div>
+                    </div>
+                </div>
+                <div class="output-card-actions">
+                    <button class="output-action-btn" onclick="regenPersona()" title="Regenerate"><i class="bi bi-arrow-clockwise"></i></button>
+                    <button class="output-action-btn" onclick="copyPersonaOutput()" title="Copy"><i class="bi bi-clipboard"></i></button>
+                    <button class="output-action-btn" onclick="downloadPersonaOutput()" title="Download .txt"><i class="bi bi-download"></i></button>
+                </div>
+            </div>
+
+            <div style="position:relative">
+                <div class="output-body" id="personaOutputBody" style="white-space:pre-wrap"></div>
+                <div class="persona-regen-overlay" id="personaRegenOverlay">
+                    <div class="gen-loading-spinner" style="width:32px;height:32px;border-width:3px"></div>
+                </div>
+            </div>
+
+            <div class="persona-refine-drawer" id="personaRefineDrawer">
+                <div class="persona-refine-inner">
+                    <input type="text" class="ds-input persona-refine-input" id="personaRefineInput"
+                           placeholder="e.g. 'More formal tone' or 'Highlight the commute route more'" />
+                    <button class="btn-ds-primary" onclick="submitPersonaRefine()" style="padding:9px 16px;font-size:13px;flex-shrink:0">
+                        <i class="bi bi-send"></i>
+                    </button>
+                </div>
+                <div style="font-size:11px;color:var(--text-tertiary);margin-top:6px">Counts as 0.25 usage units · press Enter or click send</div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border)">
+                <div id="personaWordCount" style="font-size:12px;color:var(--text-tertiary)"><i class="bi bi-text-paragraph"></i> — words</div>
+                <div style="display:flex;gap:8px">
+                    <button class="output-action-btn" onclick="togglePersonaRefine()"><i class="bi bi-magic"></i> Refine</button>
+                    <button class="btn-ds-primary" style="padding:7px 16px;font-size:13px" onclick="copyPersonaOutput()"><i class="bi bi-copy"></i>Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="fha-strip" id="personaFhaStrip" style="display:none">
+            <i class="bi bi-shield-check-fill"></i>Output scanned for Fair Housing compliance
+        </div>
+
+    </div>
+</div>
+
 @section Scripts {
 <script>
 var propId = @propId;
@@ -262,12 +355,18 @@ $.ajax({
 $('.ds-tab').on('click', function(e) {
     e.preventDefault();
     var tab = $(this).data('tab');
+    // Pro gate for persona and analyzer tabs
+    if (tab === 'persona' && document.querySelector('.ds-shell').dataset.userTier !== 'Pro') {
+        toastr.warning('Upgrade to <strong>Pro</strong> to unlock Persona Targeting.', 'Pro Feature', { timeOut: 4000 });
+        return;
+    }
     $('.ds-tab').removeClass('active');
     $(this).addClass('active');
-    $('#tabGenerate,#tabHistory,#tabAnalyze').addClass('d-none');
+    $('#tabGenerate,#tabHistory,#tabAnalyze,#tabPersona').addClass('d-none');
     if (tab==='generate') { $('#tabGenerate').removeClass('d-none'); loadLatestGen(); }
     if (tab==='history')  { $('#tabHistory').removeClass('d-none'); loadHistory(); }
     if (tab==='analyze')  { $('#tabAnalyze').removeClass('d-none'); checkProAccess(); loadAnalyzerHistory(); }
+    if (tab==='persona')  { $('#tabPersona').removeClass('d-none'); }
 });
 
 // Regen section selection
@@ -642,5 +741,6 @@ loadLatestGen();
 loadHistory();
 checkProAccess();
 loadAnalyzerHistory();
+initPersonaCards();
 </script>
 }

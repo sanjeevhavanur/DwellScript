@@ -183,6 +183,104 @@ public class GenerationApiController : ControllerBase
         }
     }
 
+    // POST /api/generation/persona
+    [HttpPost("persona")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> GeneratePersona([FromBody] PersonaDto dto)
+    {
+        var userId = _userManager.GetUserId(User)!;
+
+        var prop = await _db.Properties
+            .FirstOrDefaultAsync(p => p.Id == dto.PropertyId && p.UserId == userId);
+        if (prop == null) return NotFound(new { message = "Property not found." });
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        if (!_subscriptionService.HasAccess(user, Feature.PersonaTargeting))
+            return StatusCode(402, new { message = "Persona Targeting requires a Pro subscription. Upgrade to unlock." });
+
+        if (!await _usageService.HasQuotaAsync(userId))
+            return StatusCode(402, new { message = "You've reached your monthly generation limit. Upgrade for unlimited generations." });
+
+        if (string.IsNullOrWhiteSpace(dto.PersonaKey))
+            return BadRequest(new { message = "Persona key is required." });
+
+        try
+        {
+            var (output, fhaClean, fhaViolations) = await _generationService.GeneratePersonaAsync(
+                prop, dto.PersonaKey, null);
+
+            var gen = new Generation
+            {
+                PropertyId         = dto.PropertyId,
+                UserId             = userId,
+                Type               = GenerationType.PersonaGeneration,
+                PersonaKey         = dto.PersonaKey,
+                LtrOutput          = output,
+                UsageUnitsConsumed = 1.0m
+            };
+            _db.Generations.Add(gen);
+            await _db.SaveChangesAsync();
+
+            var wordCount = output.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+            return Ok(new { output, wordCount, fhaClean, generationId = gen.Id });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Persona generation failed for property {PropertyId}", dto.PropertyId);
+            return StatusCode(500, new { message = "Generation failed. Please try again." });
+        }
+    }
+
+    // POST /api/generation/persona-refine
+    [HttpPost("persona-refine")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> PersonaRefine([FromBody] PersonaRefineDto dto)
+    {
+        var userId = _userManager.GetUserId(User)!;
+
+        var prop = await _db.Properties
+            .FirstOrDefaultAsync(p => p.Id == dto.PropertyId && p.UserId == userId);
+        if (prop == null) return NotFound(new { message = "Property not found." });
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        if (!_subscriptionService.HasAccess(user, Feature.PersonaTargeting))
+            return StatusCode(402, new { message = "Persona Targeting requires a Pro subscription." });
+
+        if (string.IsNullOrWhiteSpace(dto.Instruction))
+            return BadRequest(new { message = "Instruction is required." });
+
+        try
+        {
+            var (output, fhaClean, _) = await _generationService.GeneratePersonaAsync(
+                prop, dto.PersonaKey, dto.Instruction);
+
+            var gen = new Generation
+            {
+                PropertyId            = dto.PropertyId,
+                UserId                = userId,
+                Type                  = GenerationType.PersonaRefine,
+                PersonaKey            = dto.PersonaKey,
+                RefinementInstruction = dto.Instruction,
+                LtrOutput             = output,
+                UsageUnitsConsumed    = 0.25m
+            };
+            _db.Generations.Add(gen);
+            await _db.SaveChangesAsync();
+
+            var wordCount = output.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+            return Ok(new { output, wordCount, fhaClean, generationId = gen.Id });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Persona refine failed for property {PropertyId}", dto.PropertyId);
+            return StatusCode(500, new { message = "Refinement failed. Please try again." });
+        }
+    }
+
     // GET /api/generation/latest/{propertyId}
     [HttpGet("latest/{propertyId:int}")]
     public async Task<IActionResult> GetLatest(int propertyId)
@@ -279,3 +377,5 @@ public class GenerationApiController : ControllerBase
 
 public record GenerateDto(int PropertyId, string? RefinementInstruction);
 public record RegenDto(int PropertyId, string? Section, string? Instruction);
+public record PersonaDto(int PropertyId, string PersonaKey);
+public record PersonaRefineDto(int PropertyId, string PersonaKey, string? Instruction);

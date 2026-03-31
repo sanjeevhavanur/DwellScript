@@ -67,6 +67,70 @@ public class GenerationService
         return ParseSectionResponse(rawResponse, section);
     }
 
+    public async Task<(string Output, bool FhaClean, List<string> FhaViolations)> GeneratePersonaAsync(
+        RentalProperty property,
+        string personaKey,
+        string? instruction)
+    {
+        var template = await GetTemplateAsync("PERSONA_GENERATION");
+        var personaName = GetPersonaName(personaKey);
+        var personaEmphasis = GetPersonaEmphasis(personaKey);
+        var prompt = BuildPersonaPrompt(template.PromptText, property, personaName, personaEmphasis, instruction);
+        var rawResponse = await CallClaudeAsync(prompt, template.SystemPrompt);
+        var output = rawResponse.Trim();
+        var scan = await _fairHousingFilter.ScanAsync(output);
+        return (output, !scan.HasViolations, scan.Violations);
+    }
+
+    private string BuildPersonaPrompt(
+        string templateText,
+        RentalProperty property,
+        string personaName,
+        string personaEmphasis,
+        string? instruction)
+    {
+        var amenities = SafeDeserializeJson(property.AmenitiesJson);
+        return templateText
+            .Replace("{Address}", property.Address)
+            .Replace("{City}", property.City)
+            .Replace("{State}", property.State)
+            .Replace("{PropertyType}", property.PropertyType)
+            .Replace("{Bedrooms}", property.Bedrooms.ToString())
+            .Replace("{Bathrooms}", property.Bathrooms.ToString())
+            .Replace("{SquareFootage}", property.SquareFootage?.ToString() ?? "Not specified")
+            .Replace("{MonthlyRent}", property.MonthlyRent?.ToString("F0") ?? "Not specified")
+            .Replace("{PetPolicy}", property.PetPolicy)
+            .Replace("{Parking}", property.Parking)
+            .Replace("{Amenities}", amenities.Count > 0 ? string.Join(", ", amenities) : "None specified")
+            .Replace("{PersonaName}", personaName)
+            .Replace("{Emphasis}", personaEmphasis)
+            .Replace("{RefinementInstruction}", string.IsNullOrWhiteSpace(instruction)
+                ? ""
+                : $"\nAdditional instruction: {instruction}");
+    }
+
+    private static string GetPersonaName(string key) => key switch
+    {
+        "remote-worker"      => "Remote Worker",
+        "pet-owner"          => "Pet Owner",
+        "commuter"           => "Commuter",
+        "outdoor-enthusiast" => "Outdoor Enthusiast",
+        "urban-lifestyle"    => "Urban Lifestyle",
+        "long-term-resident" => "Long-Term Resident",
+        _                    => key
+    };
+
+    private static string GetPersonaEmphasis(string key) => key switch
+    {
+        "remote-worker"      => "Home office availability, high-speed WiFi, quiet environment, dedicated workspace",
+        "pet-owner"          => "Pet-friendly policy, backyard or outdoor space, nearby parks, pet washing areas",
+        "commuter"           => "Highway access, commute times to major employment centers, parking, public transit links",
+        "outdoor-enthusiast" => "Proximity to green space, trails, parks, outdoor storage, patio or yard",
+        "urban-lifestyle"    => "Walkability score, nearby dining, shopping, entertainment, nightlife, cultural venues",
+        "long-term-resident" => "Community feel, lease flexibility, stability, neighborhood safety, long-term value",
+        _                    => ""
+    };
+
     private async Task<PromptTemplate> GetTemplateAsync(string key)
     {
         var template = await _db.PromptTemplates
