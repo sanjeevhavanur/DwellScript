@@ -631,4 +631,20 @@ body {
 @media (max-width: 768px) {
   .ds-sidebar { display: none; }
   .ds-content { padding: 16px; }
+
+  /* Tab bar scrolls horizontally on narrow screens */
+  .ds-page-tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;        /* Firefox */
+    padding: 0 12px;
+  }
+  .ds-page-tabs::-webkit-scrollbar { display: none; }  /* Chrome/Safari */
+
+  .ds-tab {
+    padding: 12px 10px;
+    font-size: 12.5px;
+    flex-shrink: 0;
+  }
 }

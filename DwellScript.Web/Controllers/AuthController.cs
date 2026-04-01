@@ -1,3 +1,4 @@
+using DwellScript.Web.Models;
 using DwellScript.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -10,11 +11,22 @@ public class AuthController : Controller
 {
     private readonly AuthService _authService;
     private readonly ILogger<AuthController> _logger;
+    private readonly IWebHostEnvironment _env;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
-    public AuthController(AuthService authService, ILogger<AuthController> logger)
+    public AuthController(
+        AuthService authService,
+        ILogger<AuthController> logger,
+        IWebHostEnvironment env,
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager)
     {
         _authService = authService;
         _logger = logger;
+        _env = env;
+        _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     // GET /Auth/Login
@@ -123,5 +135,53 @@ public class AuthController : Controller
     {
         await _authService.SignOutAsync();
         return RedirectToAction(nameof(Login));
+    }
+
+    // ── Dev-only test helpers (E2E) ──────────────────────────────────────
+
+    // POST /Auth/TestLogin  —  signs in any email without magic link (dev only)
+    [HttpPost]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> TestLogin([FromForm] string email)
+    {
+        if (!_env.IsDevelopment())
+            return Forbid();
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            user = new ApplicationUser { UserName = email, Email = email, EmailConfirmed = true };
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
+                return BadRequest(new { message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+        }
+
+        await _signInManager.SignInAsync(user, isPersistent: true);
+        return Ok(new { message = "Signed in.", userId = user.Id });
+    }
+
+    // POST /Auth/TestSetTier  —  sets the subscription tier for a user (dev only)
+    [HttpPost]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> TestSetTier([FromForm] string email, [FromForm] string tier)
+    {
+        if (!_env.IsDevelopment())
+            return Forbid();
+
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+            return NotFound(new { message = "User not found." });
+
+        user.Tier = tier switch
+        {
+            "Starter" => SubscriptionTier.Starter,
+            "Pro"     => SubscriptionTier.Pro,
+            _         => SubscriptionTier.Free
+        };
+
+        await _userManager.UpdateAsync(user);
+        return Ok(new { message = $"Tier set to {user.Tier}." });
     }
 }

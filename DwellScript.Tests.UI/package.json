@@ -1,0 +1,18 @@
+{
+  "name": "dwellscript-ui-tests",
+  "version": "1.0.0",
+  "description": "Playwright E2E UI tests for DwellScript",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:responsive": "playwright test tests/responsive.spec.ts",
+    "install:browsers": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^20.0.0"
+  }
+}

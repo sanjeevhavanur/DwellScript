@@ -179,6 +179,18 @@ public class PropertiesApiController : ControllerBase
         await _db.SaveChangesAsync();
         return Ok(new { copy.Id });
     }
+
+    [HttpDelete("{id:int}")]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var userId = _userManager.GetUserId(User)!;
+        var prop = await _db.Properties.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+        if (prop == null) return NotFound();
+        _db.Properties.Remove(prop);
+        await _db.SaveChangesAsync();
+        return NoContent();
+    }
 }
 
 public record PropertyUpsertDto(
