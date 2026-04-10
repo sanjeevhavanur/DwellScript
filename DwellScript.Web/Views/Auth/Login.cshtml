@@ -333,6 +333,21 @@
     color: var(--text-primary);
 }
 
+.login-terms-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-top: 16px;
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.login-terms-row:hover { border-color: var(--ds-navy-400); background: var(--bg-surface-2); }
+.login-terms-row.terms-checked { border-color: var(--ds-warm-500); background: rgba(234,88,12,.04); }
+
 @@media (max-width: 768px) {
     .login-left { display: none; }
     .login-right { width: 100%; padding: 24px 20px; }
@@ -485,7 +500,19 @@
                 </div>
             </div>
 
-            <p class="text-center mt-4 mb-0" style="font-size:12px;color:var(--text-tertiary)">
+            <!-- Terms agreement -->
+            <div class="login-terms-row" id="termsRow">
+                <input type="checkbox" id="termsCheck" style="width:15px;height:15px;accent-color:var(--ds-warm-500);flex-shrink:0;margin-top:1px;cursor:pointer;" />
+                <label for="termsCheck" style="font-size:12px;color:var(--text-secondary);line-height:1.5;cursor:pointer;user-select:none;">
+                    I agree to the <a href="/Home/Terms" target="_blank" style="color:var(--ds-navy-500);font-weight:600;text-decoration:none;" onclick="event.stopPropagation()">Terms of Service</a>,
+                    including the no-refund policy and binding arbitration agreement.
+                </label>
+            </div>
+            <div id="termsWarning" style="display:none;font-size:12px;color:#dc2626;margin-top:8px;padding:6px 10px;background:rgba(239,68,68,.07);border-radius:6px;">
+                <i class="bi bi-exclamation-circle me-1"></i>Please agree to the Terms of Service to continue.
+            </div>
+
+            <p class="text-center mt-3 mb-0" style="font-size:12px;color:var(--text-tertiary)">
                 No password required — ever.
             </p>
         </div>
@@ -530,10 +557,45 @@
         }
     }
 
+    // Terms checkbox enforcement
+    function termsAgreed() { return document.getElementById('termsCheck').checked; }
+
+    document.getElementById('termsCheck').addEventListener('change', function () {
+        var row = document.getElementById('termsRow');
+        if (this.checked) {
+            row.classList.add('terms-checked');
+            document.getElementById('termsWarning').style.display = 'none';
+        } else {
+            row.classList.remove('terms-checked');
+        }
+    });
+
+    document.getElementById('termsRow').addEventListener('click', function (e) {
+        if (e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
+        var cb = document.getElementById('termsCheck');
+        cb.checked = !cb.checked;
+        cb.dispatchEvent(new Event('change'));
+    });
+
+    function requireTerms() {
+        if (!termsAgreed()) {
+            document.getElementById('termsWarning').style.display = 'block';
+            document.getElementById('termsRow').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+        return true;
+    }
+
+    // Block Google login if terms not agreed
+    document.querySelector('.btn-google')?.addEventListener('click', function (e) {
+        if (!requireTerms()) e.preventDefault();
+    });
+
     var lastEmail = '';
 
     $('#magicForm').on('submit', function (e) {
         e.preventDefault();
+        if (!requireTerms()) return;
         var email = $('#email').val().trim();
         if (!email || !email.includes('@@')) {
             $('#email').addClass('error');

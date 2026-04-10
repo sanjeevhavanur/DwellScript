@@ -10,6 +10,8 @@ public class ApplicationUser : IdentityUser
     public SubscriptionTier Tier { get; set; } = SubscriptionTier.Free;
     public DateTime? GracePeriodEndsAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? TermsAcceptedAt { get; set; }
+    public string? TermsVersion { get; set; }
     public ICollection<Property> Properties { get; set; } = new List<Property>();
 }
 

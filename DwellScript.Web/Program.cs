@@ -1,5 +1,6 @@
 using DwellScript.Web.Data;
 using DwellScript.Web.Filters;
+using DwellScript.Web.Middleware;
 using DwellScript.Web.Models;
 using DwellScript.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -118,6 +119,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<TermsEnforcementMiddleware>();
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.MapControllers();   // attribute-routed API controllers

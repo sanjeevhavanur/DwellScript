@@ -82,6 +82,12 @@ namespace DwellScript.Web.Migrations
                     b.Property<string>("StripeSubscriptionId")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("TermsAcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TermsVersion")
+                        .HasColumnType("text");
+
                     b.Property<int>("Tier")
                         .HasColumnType("integer");
 
