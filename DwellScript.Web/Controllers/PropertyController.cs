@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DwellScript.Web.Controllers;
 
 [Authorize]
-public class PropertyController : Controller
+public class PropertyController(IConfiguration config) : Controller
 {
     public IActionResult Index()
     {
@@ -16,6 +16,7 @@ public class PropertyController : Controller
     {
         ViewData["Title"] = "Add Property";
         ViewData["IsEdit"] = false;
+        ViewData["MapboxToken"] = config["Mapbox:AccessToken"];
         return View();
     }
 
@@ -24,6 +25,7 @@ public class PropertyController : Controller
         ViewData["Title"] = "Edit Property";
         ViewData["IsEdit"] = true;
         ViewData["PropertyId"] = id;
+        ViewData["MapboxToken"] = config["Mapbox:AccessToken"];
         return View("Create");
     }
 
