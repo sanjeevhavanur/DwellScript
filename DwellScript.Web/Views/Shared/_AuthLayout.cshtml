@@ -1,9 +1,35 @@
+@{
+    var _metaTitle = ViewData["MetaTitle"]?.ToString() ?? ViewData["Title"]?.ToString() ?? "DwellScript";
+    var _metaDesc  = ViewData["MetaDescription"]?.ToString()
+                     ?? "Generate compelling rental property listings in seconds with AI. Built for landlords, property managers, and short-term rental hosts.";
+    var _canonical = ViewData["Canonical"]?.ToString() ?? "https://dwellscript.com";
+    var _ogImage   = ViewData["OgImage"]?.ToString() ?? "https://dwellscript.com/logo/DwellScriptLogo.png";
+    var _noIndex   = ViewData["NoIndex"] as bool? ?? false;
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DwellScript</title>
+    <title>@_metaTitle</title>
+    <meta name="robots" content="@(_noIndex ? "noindex, nofollow" : "index, follow")" />
+    <meta name="description" content="@_metaDesc" />
+    <link rel="canonical" href="@_canonical" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="@_canonical" />
+    <meta property="og:title" content="@_metaTitle" />
+    <meta property="og:description" content="@_metaDesc" />
+    <meta property="og:image" content="@_ogImage" />
+    <meta property="og:site_name" content="DwellScript" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@_metaTitle" />
+    <meta name="twitter:description" content="@_metaDesc" />
+    <meta name="twitter:image" content="@_ogImage" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -27,5 +53,6 @@
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("StructuredData", required: false)
 </body>
 </html>

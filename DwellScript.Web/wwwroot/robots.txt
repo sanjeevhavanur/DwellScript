@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /Auth/
+Disallow: /Property/
+Disallow: /Billing/
+Disallow: /api/
+
+Sitemap: https://dwellscript.com/sitemap.xml

@@ -1,5 +1,8 @@
 @{
-    ViewData["Title"] = "DwellScript — AI Rental Listings";
+    ViewData["Title"]           = "DwellScript — AI Rental Listing Generator";
+    ViewData["MetaTitle"]       = "DwellScript — AI Rental Listing Generator for Landlords";
+    ViewData["MetaDescription"] = "Generate compelling rental property descriptions in seconds with AI. Built for landlords, property managers, Airbnb hosts, and short-term rental operators. Free to start.";
+    ViewData["Canonical"]       = "https://dwellscript.com/";
     Layout = "_AuthLayout";
 }
 
@@ -634,3 +637,44 @@
     </footer>
 
 </div>
+
+@section StructuredData {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "SoftwareApplication",
+  "name": "DwellScript",
+  "url": "https://dwellscript.com",
+  "description": "AI-powered rental listing generator for landlords, property managers, and short-term rental hosts. Creates compelling long-term and Airbnb property descriptions in seconds.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": [
+    {
+      "@@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    {
+      "@@type": "Offer",
+      "name": "Starter",
+      "price": "9",
+      "priceCurrency": "USD",
+      "billingIncrement": "Month"
+    },
+    {
+      "@@type": "Offer",
+      "name": "Pro",
+      "price": "19",
+      "priceCurrency": "USD",
+      "billingIncrement": "Month"
+    }
+  ],
+  "publisher": {
+    "@@type": "Organization",
+    "name": "DwellScript",
+    "url": "https://dwellscript.com"
+  }
+}
+</script>
+}
