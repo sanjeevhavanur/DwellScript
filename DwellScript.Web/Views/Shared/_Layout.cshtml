@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration _config
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,6 +56,9 @@
             </a>
             <a href="/Billing" class="ds-nav-item @(currentController == "billing" ? "active" : "")">
                 <i class="bi bi-credit-card"></i>Billing
+            </a>
+            <a href="/Support" class="ds-nav-item @(currentController == "support" ? "active" : "")">
+                <i class="bi bi-life-preserver"></i>Support
             </a>
         </nav>
 
@@ -188,5 +192,32 @@
 </script>
 <script src="~/js/persona.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
+@{
+    var crispId = _config["Crisp:WebsiteId"];
+}
+@if (!string.IsNullOrWhiteSpace(crispId))
+{
+    <script>
+        window.$crisp = [];
+        window.CRISP_WEBSITE_ID = "@crispId";
+        (function () {
+            var d = document, s = d.createElement("script");
+            s.src = "https://client.crisp.chat/l.js";
+            s.async = 1;
+            d.getElementsByTagName("head")[0].appendChild(s);
+        })();
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <text>
+        // Pre-fill the user's email in the Crisp chat widget
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.$crisp) {
+                $crisp.push(["set", "user:email", ["@User.Identity.Name"]]);
+            }
+        });
+            </text>
+        }
+    </script>
+}
 </body>
 </html>

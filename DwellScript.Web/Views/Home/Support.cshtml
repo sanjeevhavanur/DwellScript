@@ -1,0 +1,166 @@
+@{
+    ViewData["Title"] = "Support";
+}
+
+<style>
+.support-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 860px;
+}
+@@media (max-width: 768px) { .support-grid { grid-template-columns: 1fr; } }
+
+.support-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2xl);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+}
+
+.support-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+}
+
+.support-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.support-card p {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.support-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.support-badge.live {
+    background: rgba(34, 197, 94, .12);
+    color: #16a34a;
+}
+
+.support-badge.async {
+    background: var(--ds-navy-100);
+    color: var(--ds-navy-700);
+}
+</style>
+
+<div style="max-width:860px">
+
+    <div style="margin-bottom:28px">
+        <h1 style="font-size:22px;font-weight:800;color:var(--text-primary);margin-bottom:6px">How can we help?</h1>
+        <p style="font-size:14px;color:var(--text-secondary);margin:0">We're here to make sure DwellScript works great for you.</p>
+    </div>
+
+    <div class="support-grid">
+
+        <!-- Live Chat -->
+        <div class="support-card" style="border-color:var(--ds-warm-500)">
+            <div class="support-card-icon" style="background:rgba(234,88,12,.1);color:var(--ds-warm-500)">
+                <i class="bi bi-chat-dots-fill"></i>
+            </div>
+            <span class="support-badge live"><i class="bi bi-circle-fill" style="font-size:7px"></i>Live Chat</span>
+            <h3>Chat with us</h3>
+            <p>Get help in real time. Click the button below and we'll respond as fast as we can.</p>
+            <button class="btn-ds" onclick="openChat()">
+                <i class="bi bi-chat-dots"></i>Start a conversation
+            </button>
+        </div>
+
+        <!-- Email -->
+        <div class="support-card">
+            <div class="support-card-icon" style="background:var(--ds-navy-100);color:var(--ds-navy-600)">
+                <i class="bi bi-envelope-fill"></i>
+            </div>
+            <span class="support-badge async"><i class="bi bi-clock"></i>Email</span>
+            <h3>Send us an email</h3>
+            <p>Prefer email? Reach us directly and we'll get back to you within one business day.</p>
+            <a href="mailto:support@dwellscript.com" class="btn-ds-ghost">
+                <i class="bi bi-envelope"></i>support@dwellscript.com
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Common questions -->
+    <div class="support-card" style="margin-top:20px;max-width:860px">
+        <h3 style="margin-bottom:16px"><i class="bi bi-question-circle me-2" style="color:var(--ds-navy-500)"></i>Common questions</h3>
+        <div style="display:flex;flex-direction:column;gap:0">
+
+            <details style="padding:14px 0;border-bottom:1px solid var(--border)">
+                <summary style="font-size:13.5px;font-weight:600;color:var(--text-primary);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    How do I upgrade or change my plan?
+                    <i class="bi bi-chevron-down" style="font-size:12px;color:var(--text-tertiary)"></i>
+                </summary>
+                <p style="margin:10px 0 0;font-size:13px;color:var(--text-secondary);line-height:1.6">
+                    Go to <a href="/Billing" style="color:var(--ds-navy-500);font-weight:600;text-decoration:none">Billing</a> and click the upgrade button for the plan you want. You'll be taken to a secure Stripe checkout.
+                </p>
+            </details>
+
+            <details style="padding:14px 0;border-bottom:1px solid var(--border)">
+                <summary style="font-size:13.5px;font-weight:600;color:var(--text-primary);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    How do I cancel my subscription?
+                    <i class="bi bi-chevron-down" style="font-size:12px;color:var(--text-tertiary)"></i>
+                </summary>
+                <p style="margin:10px 0 0;font-size:13px;color:var(--text-secondary);line-height:1.6">
+                    Go to <a href="/Billing" style="color:var(--ds-navy-500);font-weight:600;text-decoration:none">Billing</a> and click <strong>Manage in Stripe</strong>. From there you can cancel your plan — you'll keep access until the end of your billing period.
+                </p>
+            </details>
+
+            <details style="padding:14px 0;border-bottom:1px solid var(--border)">
+                <summary style="font-size:13.5px;font-weight:600;color:var(--text-primary);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    Why did my generation fail or produce unexpected output?
+                    <i class="bi bi-chevron-down" style="font-size:12px;color:var(--text-tertiary)"></i>
+                </summary>
+                <p style="margin:10px 0 0;font-size:13px;color:var(--text-secondary);line-height:1.6">
+                    Try adding more detail to your property (amenities, neighborhood, target tenant). The more context you give, the better the output. If the issue persists, start a chat and share the property details with us.
+                </p>
+            </details>
+
+            <details style="padding:14px 0">
+                <summary style="font-size:13.5px;font-weight:600;color:var(--text-primary);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+                    I didn't receive my magic link email.
+                    <i class="bi bi-chevron-down" style="font-size:12px;color:var(--text-tertiary)"></i>
+                </summary>
+                <p style="margin:10px 0 0;font-size:13px;color:var(--text-secondary);line-height:1.6">
+                    Check your spam/junk folder first. Magic links expire in 15 minutes — if it's expired, go back to the login page and request a new one. Still stuck? Email us at <a href="mailto:support@dwellscript.com" style="color:var(--ds-navy-500);font-weight:600;text-decoration:none">support@dwellscript.com</a>.
+                </p>
+            </details>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+function openChat() {
+    if (window.$crisp) {
+        $crisp.push(["do", "chat:open"]);
+    } else {
+        window.location.href = "mailto:support@dwellscript.com";
+    }
+}
+</script>
+}

@@ -36,6 +36,13 @@ public class HomeController : Controller
         return View();
     }
 
+    [Route("Support")]
+    public IActionResult Support()
+    {
+        ViewData["Title"] = "Support";
+        return View();
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
