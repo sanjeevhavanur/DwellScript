@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Billing";
+    var autoCheckoutTier = ViewData["AutoCheckoutTier"] as string;
 }
 
 <style>
@@ -152,7 +153,6 @@
         </div>
         <div style="display:flex;gap:8px">
             <button class="btn-ds-ghost" onclick="openPortal()"><i class="bi bi-gear"></i>Manage in Stripe</button>
-            <button class="btn-ds-ghost" style="color:var(--ds-error);border-color:var(--ds-error)" onclick="cancelSub()"><i class="bi bi-x-circle"></i>Cancel</button>
         </div>
     </div>
 </div>
@@ -263,15 +263,6 @@ function openPortal() {
     });
 }
 
-function cancelSub() {
-    if (!confirm('Cancel your subscription? You will retain access until the end of the billing period.')) return;
-    $.ajax({
-        url: '/api/billing/subscription', method:'DELETE',
-        headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
-        success: function() { toastr.success('Subscription cancelled.'); setTimeout(function(){ location.reload(); },1500); },
-        error: function(xhr) { toastr.error(xhr.responseJSON?.message || 'Failed to cancel.'); }
-    });
-}
 
 function downloadInvoice(id) {
     window.open('/api/billing/invoice/'+id, '_blank');
@@ -279,6 +270,16 @@ function downloadInvoice(id) {
 
 function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+@if (!string.IsNullOrEmpty(autoCheckoutTier))
+{
+    <text>
+    // Auto-start checkout from pricing page redirect
+    $(document).ready(function() {
+        checkout('@autoCheckoutTier');
+    });
+    </text>
 }
 </script>
 }

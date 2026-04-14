@@ -45,14 +45,15 @@ public class AuthController : Controller
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SendMagicLink([FromForm] string email)
+    public async Task<IActionResult> SendMagicLink([FromForm] string email, [FromForm] string? returnUrl = null)
     {
         if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
             return BadRequest(new { message = "Please enter a valid email address." });
 
         try
         {
-            await _authService.SendMagicLinkAsync(email.Trim().ToLower());
+            var safeReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : null;
+            await _authService.SendMagicLinkAsync(email.Trim().ToLower(), safeReturnUrl);
             return Ok(new { message = "Check your inbox — we sent you a login link!" });
         }
         catch (Exception ex)
@@ -62,9 +63,9 @@ public class AuthController : Controller
         }
     }
 
-    // GET /Auth/VerifyMagicLink?token=...&email=...
+    // GET /Auth/VerifyMagicLink?token=...&email=...&returnUrl=...
     [AllowAnonymous]
-    public async Task<IActionResult> VerifyMagicLink(string token, string email)
+    public async Task<IActionResult> VerifyMagicLink(string token, string email, string? returnUrl = null)
     {
         if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(email))
             return RedirectToAction(nameof(Login), new { error = "invalid" });
@@ -72,6 +73,9 @@ public class AuthController : Controller
         var success = await _authService.VerifyMagicLinkAsync(email, token);
         if (!success)
             return RedirectToAction(nameof(Login), new { error = "expired" });
+
+        if (Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
 
         return RedirectToAction("Index", "Property");
     }
@@ -125,6 +129,10 @@ public class AuthController : Controller
         }
 
         await signInManager.SignInAsync(user, isPersistent: true);
+
+        if (Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
+
         return RedirectToAction("Index", "Property");
     }
 

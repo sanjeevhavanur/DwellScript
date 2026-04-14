@@ -25,9 +25,12 @@ public class BillingController : Controller
         Stripe.StripeConfiguration.ApiKey = config["Stripe:SecretKey"];
     }
 
-    public async Task<IActionResult> Index([FromQuery(Name = "session_id")] string? sessionId)
+    public async Task<IActionResult> Index(
+        [FromQuery(Name = "session_id")] string? sessionId,
+        [FromQuery(Name = "tier")] string? tier)
     {
         ViewData["Title"] = "Billing";
+        ViewData["AutoCheckoutTier"] = tier?.ToLower() is "starter" or "pro" ? tier.ToLower() : null;
 
         // When Stripe redirects back with a session_id, apply the upgrade immediately
         // without waiting for the async webhook (which may not have fired yet).

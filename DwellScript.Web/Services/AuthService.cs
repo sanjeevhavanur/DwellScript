@@ -37,7 +37,7 @@ public class AuthService
     /// <summary>
     /// Creates the user if they don't exist, then sends a magic link email.
     /// </summary>
-    public async Task SendMagicLinkAsync(string email)
+    public async Task SendMagicLinkAsync(string email, string? returnUrl = null)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null)
@@ -78,6 +78,8 @@ public class AuthService
 
         var baseUrl = _config["AppBaseUrl"]?.TrimEnd('/');
         var link = $"{baseUrl}/Auth/VerifyMagicLink?token={Uri.EscapeDataString(rawToken)}&email={Uri.EscapeDataString(email)}";
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+            link += $"&returnUrl={Uri.EscapeDataString(returnUrl)}";
         var fromEmail = _config["Resend:FromEmail"] ?? "noreply@dwellscript.com";
 
         var message = new EmailMessage
