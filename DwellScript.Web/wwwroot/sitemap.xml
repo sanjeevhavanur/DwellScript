@@ -13,6 +13,24 @@
     <lastmod>2026-04-13</lastmod>
   </url>
   <url>
+    <loc>https://dwellscript.com/Blog</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-04-14</lastmod>
+  </url>
+  <url>
+    <loc>https://dwellscript.com/Blog/how-to-write-a-rental-listing</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-04-14</lastmod>
+  </url>
+  <url>
+    <loc>https://dwellscript.com/Blog/vacancy-too-long</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-04-14</lastmod>
+  </url>
+  <url>
     <loc>https://dwellscript.com/Support</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

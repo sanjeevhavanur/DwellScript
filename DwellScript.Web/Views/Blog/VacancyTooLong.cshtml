@@ -1,0 +1,281 @@
+@{
+    ViewData["Title"]           = "Vacancy Too Long? Here's Why Your Listing Isn't Converting";
+    ViewData["MetaTitle"]       = "Vacancy Too Long? Here's Why Your Listing Isn't Converting";
+    ViewData["MetaDescription"] = "If your rental has been sitting vacant for weeks, the problem is usually your listing — not the market. Here are the most common reasons rental listings fail to convert.";
+    ViewData["Canonical"]       = "https://dwellscript.com/Blog/vacancy-too-long";
+    Layout = "_AuthLayout";
+}
+
+<style>
+.lp-body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-primary); }
+.lp-btn-primary {
+    padding: 9px 20px;
+    background: linear-gradient(135deg, var(--ds-warm-600), var(--ds-warm-500));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s ease;
+}
+.lp-btn-primary:hover { color: #fff; opacity: .9; }
+
+.article-hero { background: var(--ds-navy-900); padding: 64px 24px 56px; text-align: center; }
+.article-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ds-warm-400); margin-bottom: 16px; }
+.article-hero h1 { font-size: clamp(24px, 4vw, 40px); font-weight: 800; color: #fff; line-height: 1.25; max-width: 720px; margin: 0 auto 16px; }
+.article-meta { font-size: 13px; color: rgba(255,255,255,.45); }
+
+.article-body {
+    max-width: 720px;
+    margin: 56px auto;
+    padding: 0 24px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+.article-body h2 { font-size: 22px; font-weight: 800; color: var(--text-primary); margin: 48px 0 16px; line-height: 1.3; }
+.article-body h3 { font-size: 17px; font-weight: 700; color: var(--text-primary); margin: 32px 0 12px; }
+.article-body p { margin-bottom: 20px; }
+.article-body ul, .article-body ol { margin: 0 0 20px 20px; }
+.article-body li { margin-bottom: 10px; }
+.article-body strong { color: var(--text-primary); font-weight: 600; }
+.article-body a { color: var(--ds-warm-600); text-decoration: none; }
+.article-body a:hover { text-decoration: underline; }
+
+.article-callout {
+    background: var(--ds-warm-50);
+    border: 1.5px solid var(--ds-warm-200);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin: 36px 0;
+}
+.article-callout p { margin: 0; font-size: 15px; color: var(--ds-warm-800); }
+
+.checklist { list-style: none; padding: 0; margin: 0 0 20px; }
+.checklist li { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 15px; }
+.checklist li::before { content: "✕"; color: #ef4444; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+.checklist.good li::before { content: "✓"; color: #16a34a; }
+
+.article-cta {
+    background: var(--ds-navy-900);
+    background-image: radial-gradient(ellipse at 30% 50%, rgba(249,115,22,.15) 0%, transparent 55%);
+    border-radius: 20px;
+    padding: 40px 36px;
+    text-align: center;
+    margin: 56px 0;
+}
+.article-cta h3 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+.article-cta p { font-size: 14px; color: rgba(255,255,255,.55); margin-bottom: 24px; }
+.article-cta a { display: inline-flex; align-items: center; gap: 8px; padding: 13px 28px; background: linear-gradient(135deg, var(--ds-warm-600), var(--ds-warm-500)); color: #fff; border-radius: 12px; font-size: 14px; font-weight: 700; text-decoration: none; }
+
+.article-nav { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 32px; margin-top: 56px; }
+.article-nav a { font-size: 13.5px; font-weight: 600; color: var(--ds-warm-600); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+
+.lp-footer { background: var(--ds-navy-900); border-top: 1px solid rgba(255,255,255,.08); padding: 32px 24px; text-align: center; margin-top: 56px; }
+.lp-footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+.lp-footer-links a { font-size: 13px; color: rgba(255,255,255,.45); text-decoration: none; }
+.lp-footer-links a:hover { color: rgba(255,255,255,.8); }
+.lp-footer-text { font-size: 13px; color: rgba(255,255,255,.35); }
+</style>
+
+<div class="lp-body">
+
+    <!-- Navbar -->
+    <nav style="position:sticky;top:0;z-index:200;background:rgba(15,31,61,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;">
+        <div style="max-width:1080px;margin:0 auto;height:60px;display:flex;align-items:center;justify-content:space-between;">
+            <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <img src="~/logo/DwellScriptLogo.png" alt="DwellScript" style="height:38px;width:auto;" />
+            </a>
+            <div style="display:flex;align-items:center;gap:16px;">
+                <a href="/Pricing" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;">Pricing</a>
+                <a href="/Blog" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;">Blog</a>
+                <a href="/Auth/Login" class="lp-btn-primary">Get Started Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="article-hero">
+        <div class="article-tag"><i class="bi bi-graph-down-arrow"></i>Vacancy Tips</div>
+        <h1>Vacancy Too Long? Here's Why Your Listing Isn't Converting</h1>
+        <div class="article-meta">April 14, 2026 · 7 min read</div>
+    </section>
+
+    <!-- Body -->
+    <article class="article-body">
+
+        <p>
+            A rental sitting vacant for more than two weeks is costing you money. At $1,500/month, every week empty is $375 gone. At $2,500/month, it's over $600 a week. And yet, many landlords respond to a slow vacancy by waiting — assuming the right tenant will eventually show up.
+        </p>
+        <p>
+            Usually, the market isn't the problem. <strong>The listing is.</strong>
+        </p>
+        <p>
+            Here are the most common reasons rental listings fail to convert inquiries into signed leases — and how to fix each one.
+        </p>
+
+        <h2>1. Your headline is invisible</h2>
+        <p>
+            On Zillow, Apartments.com, or Facebook Marketplace, your listing competes with dozens of others on the same screen. A generic headline like <em>"2BR apartment for rent"</em> gives prospective tenants zero reason to click.
+        </p>
+        <p>Compare these two headlines for the same property:</p>
+        <ul class="checklist">
+            <li>2BR/1BA apartment available now — $1,450/mo</li>
+        </ul>
+        <ul class="checklist good">
+            <li>Sunlit 2BR with In-Unit Washer/Dryer — Walkable to Downtown, Pets OK</li>
+        </ul>
+        <p>
+            The second headline surfaces the top two or three features a tenant actually cares about. It answers "why should I click?" before they even open the listing. If your headline doesn't do that, you're losing clicks to competitors who do.
+        </p>
+
+        <h2>2. The description opens with specs instead of story</h2>
+        <p>
+            "3 bedrooms, 2 bathrooms, 1,100 sq ft, available June 1st." Every listing says this. It tells a prospective tenant nothing about why they should choose <em>your</em> property over the one listed two blocks away.
+        </p>
+        <p>
+            The opening sentences of your listing are your highest-value real estate. Use them to paint a picture of what living there feels like — the morning light through the kitchen window, the five-minute walk to the train, the quiet street.
+        </p>
+        <div class="article-callout">
+            <p><strong>Rule of thumb:</strong> Save the specs for bullet points halfway through the listing. Open with the lifestyle. Tenants rent a life, not a floor plan.</p>
+        </div>
+
+        <h2>3. Your photos are doing more harm than good</h2>
+        <p>
+            Blurry photos, dark rooms, unmade beds, clutter on countertops — bad photos kill listings faster than bad copy. Studies show listings with professional-quality photos rent 50% faster and for higher rates.
+        </p>
+        <p>You don't need a professional photographer. You need:</p>
+        <ul>
+            <li><strong>Good lighting</strong> — shoot during the day with all lights on and blinds open</li>
+            <li><strong>A clean, staged space</strong> — clear every surface before shooting</li>
+            <li><strong>Wide angles</strong> — shoot from corners to make rooms look as large as possible</li>
+            <li><strong>The right order</strong> — lead with the best room, usually the living room or kitchen</li>
+        </ul>
+        <p>
+            If your photos were taken on a phone in poor lighting, retake them before you do anything else. No amount of great copy overcomes terrible photos.
+        </p>
+
+        <h2>4. You're leaving objections unanswered</h2>
+        <p>
+            Every prospective tenant has a mental checklist of deal-breakers. If your listing doesn't address them, they move on rather than reaching out to ask. Common silent objections include:
+        </p>
+        <ul>
+            <li>Is parking included or extra?</li>
+            <li>Are pets allowed? What's the fee?</li>
+            <li>Is laundry in-unit, in-building, or at a laundromat?</li>
+            <li>Which utilities are included in rent?</li>
+            <li>What's the minimum lease term?</li>
+        </ul>
+        <p>
+            Answer all of these in your listing. The more questions you answer upfront, the higher quality your inquiries will be — because only people who are genuinely interested will contact you.
+        </p>
+
+        <h2>5. Your rent is priced above market</h2>
+        <p>
+            Sometimes the listing is fine and the price is the problem. If you've had consistent views but few or no inquiries, pricing is worth examining.
+        </p>
+        <p>
+            Search your area on Zillow, Apartments.com, and Facebook Marketplace. Filter for the same bedroom count, similar square footage, and comparable amenities. If comparable units are renting for $100–$200 less than your asking price, you're priced out of the consideration set for most tenants.
+        </p>
+        <p>
+            A $100/month price reduction costs you $1,200/year. One extra month of vacancy at your current rate costs you more than that. Price it right from the start.
+        </p>
+
+        <h2>6. You're only listed on one platform</h2>
+        <p>
+            Different tenants use different platforms. Families often search on Zillow. Young professionals browse Apartments.com. Budget-conscious renters check Facebook Marketplace and Craigslist. If you're only on one, you're invisible to everyone else.
+        </p>
+        <p>
+            Post your listing on at least three platforms simultaneously. Copy-paste the same description and photos — it takes 20 minutes and doubles or triples your exposure.
+        </p>
+
+        <h2>7. There's no clear call to action</h2>
+        <p>
+            You've written a great description, uploaded clean photos, and priced it correctly. Then the listing ends with the rent amount and nothing else. What should the tenant do next?
+        </p>
+        <p>
+            Tell them explicitly: <em>"Text (555) 123-4567 to schedule a showing,"</em> or <em>"Click 'Contact' to request a tour — we respond within 24 hours."</em> A clear next step reduces friction and increases the number of inquiries you receive.
+        </p>
+
+        <h2>How to diagnose your specific problem</h2>
+        <p>Use this framework to identify exactly where your listing is breaking down:</p>
+        <ul>
+            <li><strong>Low views:</strong> The problem is platform reach or pricing. List on more platforms and check comparable rents.</li>
+            <li><strong>Views but no inquiries:</strong> The problem is the listing itself — headline, photos, description, or unanswered objections.</li>
+            <li><strong>Inquiries but no applications:</strong> The problem is the showing experience or application process.</li>
+            <li><strong>Applications but no signed leases:</strong> The problem is screening criteria or lease terms.</li>
+        </ul>
+        <p>
+            Each stage of the funnel has a different fix. Knowing where tenants are dropping off tells you exactly what to work on.
+        </p>
+
+        <div class="article-cta">
+            <h3>Get a fresh set of eyes on your listing.</h3>
+            <p>DwellScript's Vacancy Analyzer gives AI-powered feedback on why your unit might not be converting — covering copy quality, pricing signals, and market positioning.</p>
+            <a href="/Auth/Login"><i class="bi bi-stars"></i>Try DwellScript Free</a>
+        </div>
+
+        <h2>The bottom line</h2>
+        <p>
+            A long vacancy is rarely a market problem. It's almost always a listing problem — a weak headline, poor photos, unanswered objections, or pricing that's slightly off. Work through each of these systematically and your vacancy period will shorten.
+        </p>
+        <p>
+            Start with photos and headline. Those two changes alone account for the majority of listing performance improvement.
+        </p>
+
+        <div class="article-nav">
+            <a href="/Blog"><i class="bi bi-arrow-left"></i>Back to Blog</a>
+            <a href="/Pricing">See DwellScript Plans <i class="bi bi-arrow-right"></i></a>
+        </div>
+
+    </article>
+
+    <!-- Footer -->
+    <footer class="lp-footer">
+        <div class="lp-footer-links">
+            <a href="/Pricing">Pricing</a>
+            <a href="/Blog">Blog</a>
+            <a href="/Home/Privacy">Privacy Policy</a>
+            <a href="/Home/Terms">Terms of Service</a>
+            <a href="/Auth/Login">Sign In</a>
+        </div>
+        <div class="lp-footer-text">&copy; @DateTime.UtcNow.Year DwellScript. All rights reserved.</div>
+    </footer>
+
+</div>
+
+@section StructuredData {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "Article",
+  "headline": "Vacancy Too Long? Here's Why Your Listing Isn't Converting",
+  "description": "If your rental has been sitting vacant for weeks, the problem is usually your listing — not the market. Here are the most common reasons rental listings fail to convert.",
+  "datePublished": "2026-04-14",
+  "dateModified": "2026-04-14",
+  "author": {
+    "@@type": "Organization",
+    "name": "DwellScript",
+    "url": "https://dwellscript.com"
+  },
+  "publisher": {
+    "@@type": "Organization",
+    "name": "DwellScript",
+    "url": "https://dwellscript.com",
+    "logo": {
+      "@@type": "ImageObject",
+      "url": "https://dwellscript.com/logo/DwellScriptLogo.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@@type": "WebPage",
+    "@@id": "https://dwellscript.com/Blog/vacancy-too-long"
+  }
+}
+</script>
+}

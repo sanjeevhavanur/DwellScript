@@ -1,0 +1,120 @@
+@{
+    ViewData["Title"]           = "Blog";
+    ViewData["MetaTitle"]       = "DwellScript Blog — Rental Listing Tips for Landlords";
+    ViewData["MetaDescription"] = "Practical guides for landlords and property managers on writing rental listings, reducing vacancy, and marketing properties on Zillow, Airbnb, and more.";
+    ViewData["Canonical"]       = "https://dwellscript.com/Blog";
+    Layout = "_AuthLayout";
+}
+
+<style>
+.lp-body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-primary); }
+.lp-container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+.lp-btn-primary {
+    padding: 9px 20px;
+    background: linear-gradient(135deg, var(--ds-warm-600), var(--ds-warm-500));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s ease;
+}
+.lp-btn-primary:hover { color: #fff; opacity: .9; }
+
+/* Blog grid */
+.blog-hero { background: var(--ds-navy-900); padding: 60px 24px; text-align: center; }
+.blog-hero h1 { font-size: clamp(26px, 4vw, 40px); font-weight: 800; color: #fff; margin-bottom: 12px; }
+.blog-hero p { font-size: 16px; color: rgba(255,255,255,.6); max-width: 480px; margin: 0 auto; }
+
+.blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; padding: 56px 24px; max-width: 1080px; margin: 0 auto; }
+.blog-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    transition: all .2s ease;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+}
+.blog-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.blog-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ds-warm-600); margin-bottom: 12px; }
+.blog-card h2 { font-size: 17px; font-weight: 800; color: var(--text-primary); line-height: 1.4; margin-bottom: 10px; }
+.blog-card p { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; flex: 1; margin-bottom: 20px; }
+.blog-card-footer { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-tertiary); }
+.blog-read-more { font-size: 13px; font-weight: 600; color: var(--ds-warm-600); text-decoration: none; display: flex; align-items: center; gap: 4px; }
+
+/* Footer */
+.lp-footer { background: var(--ds-navy-900); border-top: 1px solid rgba(255,255,255,.08); padding: 32px 24px; text-align: center; }
+.lp-footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+.lp-footer-links a { font-size: 13px; color: rgba(255,255,255,.45); text-decoration: none; }
+.lp-footer-links a:hover { color: rgba(255,255,255,.8); }
+.lp-footer-text { font-size: 13px; color: rgba(255,255,255,.35); }
+</style>
+
+<div class="lp-body">
+
+    <!-- Navbar -->
+    <nav style="position:sticky;top:0;z-index:200;background:rgba(15,31,61,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;">
+        <div style="max-width:1080px;margin:0 auto;height:60px;display:flex;align-items:center;justify-content:space-between;">
+            <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <img src="~/logo/DwellScriptLogo.png" alt="DwellScript" style="height:38px;width:auto;" />
+            </a>
+            <div style="display:flex;align-items:center;gap:16px;">
+                <a href="/Pricing" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;">Pricing</a>
+                <a href="/Blog" style="font-size:13.5px;font-weight:500;color:#fff;text-decoration:none;">Blog</a>
+                <a href="/Auth/Login" class="lp-btn-primary">Get Started Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="blog-hero">
+        <h1>Landlord Tips & Resources</h1>
+        <p>Practical guides on writing rental listings, reducing vacancy, and marketing your properties.</p>
+    </section>
+
+    <!-- Articles -->
+    <div class="blog-grid">
+
+        <a href="/Blog/how-to-write-a-rental-listing" class="blog-card">
+            <div class="blog-tag"><i class="bi bi-pencil-fill"></i>Listing Copy</div>
+            <h2>How to Write a Rental Listing That Actually Gets Calls</h2>
+            <p>Most rental listings fail before anyone picks up the phone. Here's a step-by-step framework for writing listing copy that attracts quality tenants fast.</p>
+            <div class="blog-card-footer">
+                <span>April 14, 2026 · 6 min read</span>
+                <span class="blog-read-more">Read more <i class="bi bi-arrow-right"></i></span>
+            </div>
+        </a>
+
+        <a href="/Blog/vacancy-too-long" class="blog-card">
+            <div class="blog-tag"><i class="bi bi-graph-down-arrow"></i>Vacancy Tips</div>
+            <h2>Vacancy Too Long? Here's Why Your Listing Isn't Converting</h2>
+            <p>If your rental has been sitting vacant for weeks, the problem is usually your listing — not the market. Here's how to diagnose and fix it.</p>
+            <div class="blog-card-footer">
+                <span>April 14, 2026 · 7 min read</span>
+                <span class="blog-read-more">Read more <i class="bi bi-arrow-right"></i></span>
+            </div>
+        </a>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="lp-footer">
+        <div class="lp-footer-links">
+            <a href="/Pricing">Pricing</a>
+            <a href="/Blog">Blog</a>
+            <a href="/Home/Privacy">Privacy Policy</a>
+            <a href="/Home/Terms">Terms of Service</a>
+            <a href="/Auth/Login">Sign In</a>
+        </div>
+        <div class="lp-footer-text">&copy; @DateTime.UtcNow.Year DwellScript. All rights reserved.</div>
+    </footer>
+
+</div>

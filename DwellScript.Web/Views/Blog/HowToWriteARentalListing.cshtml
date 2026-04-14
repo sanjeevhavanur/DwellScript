@@ -1,0 +1,284 @@
+@{
+    ViewData["Title"]           = "How to Write a Rental Listing That Actually Gets Calls";
+    ViewData["MetaTitle"]       = "How to Write a Rental Listing That Actually Gets Calls";
+    ViewData["MetaDescription"] = "Most rental listings fail before anyone picks up the phone. Here's a step-by-step framework for writing listing copy that attracts quality tenants fast.";
+    ViewData["Canonical"]       = "https://dwellscript.com/Blog/how-to-write-a-rental-listing";
+    Layout = "_AuthLayout";
+}
+
+<style>
+.lp-body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-primary); }
+.lp-btn-primary {
+    padding: 9px 20px;
+    background: linear-gradient(135deg, var(--ds-warm-600), var(--ds-warm-500));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .2s ease;
+}
+.lp-btn-primary:hover { color: #fff; opacity: .9; }
+
+/* Article */
+.article-hero { background: var(--ds-navy-900); padding: 64px 24px 56px; text-align: center; }
+.article-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ds-warm-400); margin-bottom: 16px; }
+.article-hero h1 { font-size: clamp(24px, 4vw, 40px); font-weight: 800; color: #fff; line-height: 1.25; max-width: 720px; margin: 0 auto 16px; }
+.article-meta { font-size: 13px; color: rgba(255,255,255,.45); }
+
+.article-body {
+    max-width: 720px;
+    margin: 56px auto;
+    padding: 0 24px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+.article-body h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 48px 0 16px;
+    line-height: 1.3;
+}
+.article-body h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 32px 0 12px;
+}
+.article-body p { margin-bottom: 20px; }
+.article-body ul, .article-body ol { margin: 0 0 20px 20px; }
+.article-body li { margin-bottom: 10px; }
+.article-body strong { color: var(--text-primary); font-weight: 600; }
+.article-body a { color: var(--ds-warm-600); text-decoration: none; }
+.article-body a:hover { text-decoration: underline; }
+
+.article-callout {
+    background: var(--ds-warm-50);
+    border: 1.5px solid var(--ds-warm-200);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin: 36px 0;
+}
+.article-callout p { margin: 0; font-size: 15px; color: var(--ds-warm-800); }
+
+.article-cta {
+    background: var(--ds-navy-900);
+    background-image: radial-gradient(ellipse at 30% 50%, rgba(249,115,22,.15) 0%, transparent 55%);
+    border-radius: 20px;
+    padding: 40px 36px;
+    text-align: center;
+    margin: 56px 0;
+}
+.article-cta h3 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+.article-cta p { font-size: 14px; color: rgba(255,255,255,.55); margin-bottom: 24px; }
+.article-cta a { display: inline-flex; align-items: center; gap: 8px; padding: 13px 28px; background: linear-gradient(135deg, var(--ds-warm-600), var(--ds-warm-500)); color: #fff; border-radius: 12px; font-size: 14px; font-weight: 700; text-decoration: none; }
+
+.article-nav { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 32px; margin-top: 56px; }
+.article-nav a { font-size: 13.5px; font-weight: 600; color: var(--ds-warm-600); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+
+/* Footer */
+.lp-footer { background: var(--ds-navy-900); border-top: 1px solid rgba(255,255,255,.08); padding: 32px 24px; text-align: center; margin-top: 56px; }
+.lp-footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 12px; flex-wrap: wrap; }
+.lp-footer-links a { font-size: 13px; color: rgba(255,255,255,.45); text-decoration: none; }
+.lp-footer-links a:hover { color: rgba(255,255,255,.8); }
+.lp-footer-text { font-size: 13px; color: rgba(255,255,255,.35); }
+</style>
+
+<div class="lp-body">
+
+    <!-- Navbar -->
+    <nav style="position:sticky;top:0;z-index:200;background:rgba(15,31,61,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;">
+        <div style="max-width:1080px;margin:0 auto;height:60px;display:flex;align-items:center;justify-content:space-between;">
+            <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                <img src="~/logo/DwellScriptLogo.png" alt="DwellScript" style="height:38px;width:auto;" />
+            </a>
+            <div style="display:flex;align-items:center;gap:16px;">
+                <a href="/Pricing" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;">Pricing</a>
+                <a href="/Blog" style="font-size:13.5px;font-weight:500;color:rgba(255,255,255,.6);text-decoration:none;">Blog</a>
+                <a href="/Auth/Login" class="lp-btn-primary">Get Started Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="article-hero">
+        <div class="article-tag"><i class="bi bi-pencil-fill"></i>Listing Copy</div>
+        <h1>How to Write a Rental Listing That Actually Gets Calls</h1>
+        <div class="article-meta">April 14, 2026 · 6 min read</div>
+    </section>
+
+    <!-- Body -->
+    <article class="article-body">
+
+        <p>
+            Most rental listings look the same: a bullet list of bedrooms and bathrooms, a vague sentence about the neighborhood, and a phone number. And then landlords wonder why their inbox is quiet.
+        </p>
+        <p>
+            The truth is, <strong>your listing is your first showing.</strong> Before a prospective tenant ever steps foot in your property, they've already decided whether it's worth a call based on 30 seconds of reading. A weak listing loses that decision every time.
+        </p>
+        <p>
+            Here's a step-by-step framework for writing rental listing copy that attracts quality tenants — and fills vacancies faster.
+        </p>
+
+        <h2>1. Lead with the lifestyle, not the specs</h2>
+        <p>
+            Every listing starts with bedrooms and bathrooms. Yours shouldn't. Features are table stakes — tenants assume a 2-bedroom apartment has two bedrooms. What they're actually searching for is a <em>life they want to live.</em>
+        </p>
+        <p>
+            Instead of opening with:
+        </p>
+        <div class="article-callout">
+            <p>"2BR/1BA apartment available June 1st. 850 sq ft. Laundry in building."</p>
+        </div>
+        <p>Try leading with:</p>
+        <div class="article-callout">
+            <p>"Wake up a five-minute walk from the farmer's market, grab a coffee at the corner café, and be on the highway in under 10 minutes. This bright 2-bedroom apartment puts the best of the neighborhood at your door."</p>
+        </div>
+        <p>
+            You can include the specs — but lead with the experience. Emotion drives the call, logic justifies it.
+        </p>
+
+        <h2>2. Write a headline that stops the scroll</h2>
+        <p>
+            On platforms like Zillow and Apartments.com, your headline competes with dozens of listings on the same page. A generic headline like "Nice 2BR in good location" is invisible.
+        </p>
+        <p>Good headlines follow one of three formulas:</p>
+        <ul>
+            <li><strong>Highlight the #1 feature:</strong> "Sunlit 2BR with Private Rooftop Deck — No Pet Fees"</li>
+            <li><strong>Call out the ideal tenant:</strong> "Remote Worker's Dream: Fast WiFi, Dedicated Office, Quiet Block"</li>
+            <li><strong>Lead with the neighborhood:</strong> "Steps from Whole Foods & the Metro — Renovated 1BR Available Now"</li>
+        </ul>
+        <p>
+            Write 2–3 headline options and test them. Small word changes can significantly change click-through rates.
+        </p>
+
+        <h2>3. Structure your description for skimmers</h2>
+        <p>
+            Tenants don't read listings — they scan them. Structure your description so the most important information is impossible to miss.
+        </p>
+        <p>A proven structure:</p>
+        <ol>
+            <li><strong>Opening hook</strong> (1–2 sentences) — lifestyle or standout feature</li>
+            <li><strong>Property highlights</strong> (3–5 bullet points) — the best amenities</li>
+            <li><strong>Neighborhood context</strong> (2–3 sentences) — walkability, transit, nearby spots</li>
+            <li><strong>Practical details</strong> — rent, availability, lease terms, pet policy</li>
+            <li><strong>Call to action</strong> — clear next step ("Schedule a tour at the link below")</li>
+        </ol>
+        <p>
+            Keep the whole description under 300 words. Longer is not better — it's a signal that you don't know what matters.
+        </p>
+
+        <h2>4. Be specific about amenities</h2>
+        <p>
+            "Updated kitchen" means nothing. "Quartz countertops, stainless steel appliances, and a gas range" means something. Specificity builds credibility and paints a picture.
+        </p>
+        <p>Go through each room and ask: what is the <em>one specific detail</em> that makes this room worth mentioning? Then write that detail, not a generic category.</p>
+        <ul>
+            <li>Instead of "nice bathroom" → "walk-in shower with rainfall head and heated floors"</li>
+            <li>Instead of "good natural light" → "south-facing windows that stay bright all afternoon"</li>
+            <li>Instead of "parking available" → "dedicated covered parking spot included in rent"</li>
+        </ul>
+
+        <h2>5. Address objections before they arise</h2>
+        <p>
+            Prospective tenants have a mental checklist of deal-breakers. If your listing doesn't address them, they move on. Common ones include:
+        </p>
+        <ul>
+            <li>Pet policy — state it clearly upfront</li>
+            <li>Laundry — in-unit, in-building, or nearest laundromat?</li>
+            <li>Parking — included, street, or paid?</li>
+            <li>Utilities — which are included in rent?</li>
+            <li>Lease length — 12 months, 6 months, month-to-month?</li>
+        </ul>
+        <p>
+            The more questions your listing answers, the higher quality your inquiries will be — because only genuinely interested tenants will reach out.
+        </p>
+
+        <h2>6. Stay Fair Housing compliant</h2>
+        <p>
+            The Fair Housing Act prohibits listings that express preference or limitation based on race, color, religion, sex, national origin, disability, or familial status. Violations can be unintentional — phrases like "perfect for a single professional" or "great for couples" can cross the line.
+        </p>
+        <p>
+            Before publishing, review your listing for any language that implies a preferred tenant type. Stick to describing the property, not the ideal resident.
+        </p>
+
+        <h2>7. End with a clear call to action</h2>
+        <p>
+            Too many listings end with the rent amount and nothing else. Tell the tenant exactly what to do next: "Schedule a tour using the link below," "Text us to set up a showing," or "Apply directly at [URL]."
+        </p>
+        <p>
+            A specific CTA reduces friction and increases the number of qualified inquiries you receive.
+        </p>
+
+        <div class="article-cta">
+            <h3>Skip the blank page entirely.</h3>
+            <p>DwellScript generates a complete, Fair Housing compliant rental listing in ~15 seconds. Free to start.</p>
+            <a href="/Auth/Login"><i class="bi bi-stars"></i>Try DwellScript Free</a>
+        </div>
+
+        <h2>The bottom line</h2>
+        <p>
+            A great rental listing isn't about writing talent — it's about structure, specificity, and understanding what your prospective tenant is actually looking for. Lead with lifestyle, be specific about features, answer objections, and end with a clear next step.
+        </p>
+        <p>
+            Do those four things consistently, and your vacancy periods will get shorter.
+        </p>
+
+        <div class="article-nav">
+            <a href="/Blog"><i class="bi bi-arrow-left"></i>Back to Blog</a>
+            <a href="/Pricing">See DwellScript Plans <i class="bi bi-arrow-right"></i></a>
+        </div>
+
+    </article>
+
+    <!-- Footer -->
+    <footer class="lp-footer">
+        <div class="lp-footer-links">
+            <a href="/Pricing">Pricing</a>
+            <a href="/Blog">Blog</a>
+            <a href="/Home/Privacy">Privacy Policy</a>
+            <a href="/Home/Terms">Terms of Service</a>
+            <a href="/Auth/Login">Sign In</a>
+        </div>
+        <div class="lp-footer-text">&copy; @DateTime.UtcNow.Year DwellScript. All rights reserved.</div>
+    </footer>
+
+</div>
+
+@section StructuredData {
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "Article",
+  "headline": "How to Write a Rental Listing That Actually Gets Calls",
+  "description": "Most rental listings fail before anyone picks up the phone. Here's a step-by-step framework for writing listing copy that attracts quality tenants fast.",
+  "datePublished": "2026-04-14",
+  "dateModified": "2026-04-14",
+  "author": {
+    "@@type": "Organization",
+    "name": "DwellScript",
+    "url": "https://dwellscript.com"
+  },
+  "publisher": {
+    "@@type": "Organization",
+    "name": "DwellScript",
+    "url": "https://dwellscript.com",
+    "logo": {
+      "@@type": "ImageObject",
+      "url": "https://dwellscript.com/logo/DwellScriptLogo.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@@type": "WebPage",
+    "@@id": "https://dwellscript.com/Blog/how-to-write-a-rental-listing"
+  }
+}
+</script>
+}
